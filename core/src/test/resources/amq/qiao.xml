@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qiao-config>
+
+   <funnel id="tailer" emitter-threads="${emitter.amq.numConnections}">
+
+      <injector id="fileTailerSource" class="com.aol.advertising.qiao.injector.TailInjector">
+         <property name="filename" value="${fileTailer.filename}" />
+         <property name="tailMode" value="${fileTailer.tailmode}" />
+         <property name="dataHandler" ref="binDataHandler" />
+         <property name="filePattern" value="${filetailer.filepattern}" />         
+      </injector>
+
+      <emitter id="echoSink1" class="com.aol.advertising.qiao.emitter.EchoDataSink" />
+
+      <emitter id="amqEmitter" class="com.aol.advertising.qiao.emitter.AMQEmitter">
+         <property name="brokerURL" value="${emitter.amq.brokerURL}" />
+         <property name="destinationName" value="${emitter.amq.destinationName}" />
+         <property name="msgCreator" ref="amqMsgCreator" />
+      </emitter>
+
+   </funnel>
+
+</qiao-config>

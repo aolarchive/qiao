@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans default-lazy-init="true" 
+   xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:jms="http://www.springframework.org/schema/jms" xmlns:p="http://www.springframework.org/schema/p"
+   xmlns:context="http://www.springframework.org/schema/context" xmlns:task="http://www.springframework.org/schema/task"
+   xmlns:util="http://www.springframework.org/schema/util"
+   xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd 
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd 
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+   <!--
++===================+
+| Main              |  
++===================+
+   -->
+
+   <bean id="bootstrap" class="com.aol.advertising.qiao.bootstrap.Bootstrap">
+      <property name="mbeanDomain" value="${jmx.mbean.domain:qiao}" />
+      <property name="mbeanExporter" ref="dynamicMBeanExporter" />
+   </bean>
+
+   <bean id="agent" class="com.aol.advertising.qiao.agent.QiaoAgent">
+      <property name="statsManager" ref="statsManager" />
+   </bean>
+
+   <bean id="funnel" class="com.aol.advertising.qiao.agent.DataFunnel" scope="prototype">
+      <property name="dataPipeClassname" value="${funnel.data.pipe.classname:com.aol.advertising.qiao.agent.DataPipe}" />
+      <property name="dataPipeCapacity" value="${funnel.data.pipe.capacity:4}" />
+      <property name="initDelaySecs" value="${funnel.monitor.init.delay.secs:10}" />
+      <property name="intervalSecs" value="${funnel.monitor.interval.secs:5}" />
+   </bean>
+
+   <bean id="emitterContainer" class="com.aol.advertising.qiao.emitter.DataSpray" scope="prototype" />
+
+
+   <!--
++===================+
+| Injectors         |  
++===================+
+   -->
+   <bean class="com.aol.advertising.qiao.injector.RandomIntegerDataSource" scope="prototype">
+      <property name="maxValue" value="${random.integer.injector.max.value:100}" />
+      <property name="targetRate" value="${random.integer.injector.rate.limit:0}" />
+   </bean>
+
+   <bean class="com.aol.advertising.qiao.injector.TailInjector" scope="prototype">
+      <property name="bookKeeper" ref="fileBookKeeper" />
+      <property name="fileLockManager" ref="fileLockManager" />
+      <property name="delayMillis" value="${injector.tail.pullIntervalMillis:10}" />
+      <property name="bufSize" value="${injector.tail.buffersize:4096}" />
+      <!-- <property name="dataHandler" ref="${injector.tail.data.handler:nopDataHanlder}" /> -->
+      <property name="filename" value="${injector.tail.filename:#{null}}" />
+      <property name="tailMode" value="${injector.tail.tailmode:TEXTBLOCK}" />
+      <property name="durabilitySettings" value="${injector.tail.positionCach.durability:#{null}}" />
+      <property name="cacheDefaultExpirySecs" value="${injector.tail.positionCache.defaultExpirySecs:604800}" />
+      <property name="cacheDiskReapingIntervalSecs" value="${injector.tail.positionCache.diskReapingIntervalSecs:60}" />
+      <property name="cacheDiskReapingInitDelaySecs" value="${injector.tail.positionCache.diskReapingInitDelaySecs:60}" />
+   </bean>
+
+   <bean class="com.aol.advertising.qiao.injector.PatternMatchFileInjector" scope="prototype">
+      <property name="bookKeeper" ref="fileBookKeeper" />
+      <property name="fileLockManager" ref="fileLockManager" />
+      <property name="fileCheckDelayMillis" value="${injector.fileinjector.pullIntervalMillis:10}" />
+      <property name="bufSize" value="${injector.fileinjector.buffersize:4096}" />
+      <!-- <property name="dataHandler" ref="${injector.fileinjector.data.handler:nopDataHanlder}" /> -->
+      <property name="readMode" value="${injector.fileinjector.readmode:TEXTBLOCK}" />
+      <property name="durabilitySettings" value="${injector.fileinjector.positionCache.durability:#{null}}" />
+      <property name="cacheDefaultExpirySecs" value="${injector.fileinjector.positionCache.defaultExpirySecs:604800}" />
+      <property name="cacheDiskReapingIntervalSecs" value="${injector.fileinjector.positionCache.diskReapingIntervalSecs:60}" />
+      <property name="cacheDiskReapingInitDelaySecs" value="${injector.fileinjector.positionCache.diskReapingInitDelaySecs:60}" />
+      <property name="quarantineFileHandler" ref="quarantineFileHandler" />
+   </bean>
+
+   <bean id="nopDataHanlder" class="com.aol.advertising.qiao.injector.file.NopDataHandler" scope="prototype" />
+   
+   
+   <!--
++===================+
+| Emitters          |  
++===================+
+   -->
+   <bean class="com.aol.advertising.qiao.emitter.EchoDataSink" scope="prototype" />
+
+   <bean class="com.aol.advertising.qiao.emitter.AMQEmitter" scope="prototype">
+      <property name="connectionFactory">
+         <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+            <property name="useAsyncSend" value="${emitter.amq.use.async.send:true}" />
+            <property name="dispatchAsync" value="${emitter.amq.dispatch.async:true}" />
+            <property name="optimizeAcknowledge" value="${emitter.amq.optimize.acknowledge:true}" />
+            <property name="optimizedMessageDispatch" value="${emitter.amq.optimize.message.dispatch:true}" />
+            <property name="copyMessageOnSend" value="${emitter.amq.copyOnSend:true}" />
+         </bean>
+      </property>
+      <property name="brokerURL" value="${emitter.amq.connection.url:#{null}}" />
+      <property name="destinationName" value="${emitter.amq.destinationName:#{null}}" />
+      <property name="statsCollector" ref="statsCollector" />
+      <!-- property name="msgCreator" ref="jmsMsgCreator" / -->
+      <property name="transacted" value="${emitter.amq.transacted:false}" />
+      <property name="deliveryMode">
+         <util:constant static-field="${emitter.amq.delivery.mode:javax.jms.DeliveryMode.NON_PERSISTENT}" />
+      </property>
+      <property name="ackMode">
+         <util:constant static-field="${emitter.amq.ackMode:javax.jms.Session.AUTO_ACKNOWLEDGE}" />
+      </property>
+      <property name="connectionController" ref="connectionController" />
+   </bean>
+
+   <bean class="com.aol.advertising.qiao.emitter.KafkaEmitter" scope="prototype">
+      <property name="brokerList" value="${emitter.kafka.broker.list:#{null}}" />
+      <property name="topic" value="${emitter.kafka.topic:#{null}}" />
+      <property name="clientId" value="${emitter.kafka.clientId:#{null}}" />
+      <property name="acknowledgePolicy" value="${emitter.kafka.ackPolicy:NO_ACK}" />
+      <property name="producerType" value="${emitter.kafka.producerType:async}" />
+   </bean>
+
+   <!--
++===================+
+| File Services     |  
++===================+
+   -->
+
+   <bean id="qiaoFileManager" class="com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager">
+      <property name="srcDir" value="${qiaoFileManager.watch.srcDir:#{null}}" />
+      <property name="donefilePattern" value="${qiaoFileManager.watch.donefilePattern:#{null}}" />
+      <property name="maxFilesToFind" value="${qiaoFileManager.watch.maxFilesToFind:-1}" />
+      <property name="checksumByteLength" value="${qiaoFileManager.checksumByteLength:2048}" />
+      <property name="fileCheckDelayMillis" value="${qiaoFileManager.fileCheckDelayMillis:1000}" />
+      <property name="doneFileHandler" ref="doneFileHandler" />
+      <property name="quarantineFileHandler" ref="quarantineFileHandler" />
+      <property name="candidateFilesPatternForRename" value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
+   </bean>
+
+   <bean id="fileBookKeeper" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper">
+      <property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath:#{null}}" />
+      <property name="cacheDefaultExpirySecs" value="${file.bookkeeper.cache.defaultExpirySecs:604800}" />
+      <property name="cacheDiskReapingIntervalSecs" value="${file.bookkeeper.cache.diskReapingIntervalSecs:60}" />
+      <property name="cacheDiskReapingInitDelaySecs" value="${file.bookkeeper.cache.diskReapingInitDelaySecs:60}" />
+   </bean>
+
+   <bean id="fileWatcher"  class="com.aol.advertising.qiao.injector.file.watcher.FileWatchService" />
+ 
+   <bean id="doneFileHandler" class="com.aol.advertising.qiao.injector.file.DoneFileHandler">
+      <property name="targetDir" value="${doneFileListener.donefile.move-targetDir:#{null}}" />
+      <property name="targetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy:#{null}}" />
+   </bean>
+
+   <bean id="quarantineFileHandler" class="com.aol.advertising.qiao.management.QuarantineFileHandler">
+      <property name="targetDir" value="${quarantineFileHandler.move-targetDir:#{null}}" />
+      <property name="targetNamingStrategy" value="${quarantineFileHandler.move-targetName.strategy:#{null}}" />
+   </bean>
+
+   <bean id="fileLockManager" class="com.aol.advertising.qiao.management.FileLockManager" />
+
+   <bean id="positionCache" class="com.aol.advertising.qiao.util.cache.PositionCache" scope="prototype" >
+      <property name="defaultExpirySecs" value="${positionCache.defaultExpirySecs:604800}" />
+      <property name="diskReapingIntervalSecs" value="${positionCache.diskReapingIntervalSecs:60}" />
+      <property name="diskReapingInitDelaySecs" value="${positionCache.diskReapingInitDelaySecs:60}" />
+      <property name="maxTries" value="${positionCache.maxTries:3}" />
+      <property name="lockConflictRetryMsecs" value="${positionCache.lockConflictRetryMsecs:100}" />
+   </bean>
+   
+   <!--
++===================+
+| Statistics        |  
++===================+
+   -->
+
+   <bean id="statsManager" class="com.aol.advertising.qiao.management.metrics.StatsManager">
+      <property name="collector" ref="statsCollector" />
+      <property name="calculator" ref="statsCalc" />
+   </bean>
+
+   <bean id="statsStore" class="${statistics_store.classname:com.aol.advertising.qiao.management.metrics.StatisticsStore}"
+      scope="prototype">
+      <property name="statsManager" ref="statsManager" />
+   </bean>
+
+   <bean id="statsCollector" class="com.aol.advertising.qiao.management.metrics.StatsCollector">
+      <property name="initDelaySecs" value="${stats.collector.init.delay.secs:3}" />
+      <property name="intervalSecs" value="${stats.collector.interval.secs:15}" />
+   </bean>
+
+   <bean id="statsCalc" class="com.aol.advertising.qiao.management.metrics.StatsCalculator">
+      <property name="initDelaySecs" value="${stats.calc.init.delay.secs:15}" />
+      <property name="intervalSecs" value="${stats.calc.interval.secs:30}" />
+      <property name="writeToLog" value="${stats.write.to.log:true}" />
+   </bean>
+
+   <util:map id="defaultCounterKeys" map-class="java.util.LinkedHashMap" >
+      <entry key="input_count" value="AVERAGE" />
+      <entry key="output_count" value="AVERAGE" />
+      <entry key="processed_count" value="AVERAGE" />
+      <entry key="input_count" value="RAW" />
+      <entry key="output_count" value="RAW" />
+      <entry key="processed_count" value="RAW" />
+   </util:map>
+
+
+   <!--
++===================+
+| Utilities         |  
++===================+
+   -->
+   <bean id="contextUtils" class="com.aol.advertising.qiao.util.ContextUtils" lazy-init="false" factory-method="getInstance"/>
+
+   <bean id="statsUtil" class="com.aol.advertising.qiao.util.StatsUtils" lazy-init="false" factory-method="getInstance">
+      <property name="statsManager" ref="statsManager" />
+   </bean>
+
+
+   <!--
++===================+
+| JMX               |  
++===================+
+   -->
+   <bean id="loggingControl" class="com.aol.advertising.qiao.management.jmx.Log4jLevelControl" lazy-init="false">
+      <property name="log4jLocation" value="${log4j.config.location:classpath:log4j.properties}" />
+   </bean>
+
+   <util:map id="commonMBeanMap">
+      <entry key="${jmx.mbean.domain}:name=Log4j" value-ref="loggingControl" />
+   </util:map>
+
+   <bean id="mbeanExporter" class="org.springframework.jmx.export.MBeanExporter">
+      <property name="assembler">
+         <bean class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+            <property name="attributeSource" ref="jmxAttributeSource" />
+         </bean>
+      </property>
+      <property name="namingStrategy">
+         <bean class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+            <property name="attributeSource" ref="jmxAttributeSource" />
+         </bean>
+      </property>
+      <property name="autodetect" value="${mbeanExporter.autodetect:false}" />
+   </bean>
+
+   <bean id="jmxAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource" />
+
+   <bean id="dynamicMBeanExporter" class="com.aol.advertising.qiao.management.jmx.DynamicMBeanExporter">
+      <property name="exporter" ref="mbeanExporter" />
+      <property name="attributeSource" ref="jmxAttributeSource" />
+   </bean>
+
+   <bean id="connectionController" class="com.aol.advertising.qiao.management.ConnectionController" lazy-init="false" />
+
+</beans>

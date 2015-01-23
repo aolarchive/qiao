@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+   <xs:element name="qiao-config">
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element ref="funnel" minOccurs="1" maxOccurs="unbounded" />
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+   <xs:element name="funnel">
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element ref="property" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="injector" minOccurs="1" maxOccurs="1" />
+            <xs:element ref="emitter" minOccurs="1" maxOccurs="unbounded" />
+         </xs:sequence>
+         <xs:attribute type="xs:string" name="id" use="required" />
+         <xs:attribute type="xs:string" name="class" />
+         <xs:attribute type="xs:string" name="auto-start" />
+         <xs:attribute type="xs:string" name="qsize" />
+         <xs:attribute type="xs:string" name="rate-limit" />
+         <xs:attribute type="xs:string" name="emitter-threads" />
+       </xs:complexType>
+   </xs:element>
+   <xs:element name="injector">
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element ref="property" minOccurs="0" maxOccurs="unbounded" />
+         </xs:sequence>
+         <xs:attribute type="xs:string" name="id" use="required" />
+         <xs:attribute type="xs:string" name="class" use="required" />
+         <xs:attribute type="xs:string" name="initPositionsFrom" use="optional" />
+      </xs:complexType>
+   </xs:element>
+   <xs:element name="emitter">
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element ref="property" minOccurs="0" maxOccurs="unbounded" />
+         </xs:sequence>
+         <xs:attribute type="xs:string" name="id" use="required" />
+         <xs:attribute type="xs:string" name="class" use="required" />
+      </xs:complexType>
+   </xs:element>
+   <!-- -->
+   <xs:element name="property">
+      <xs:complexType>
+         <xs:attribute name="name" type="xs:string" use="required" />
+         <xs:attribute name="value" type="xs:string" />
+         <xs:attribute name="ref" type="xs:string" />
+         <xs:attribute name="type" default="string">
+            <xs:simpleType>
+               <xs:restriction base="xs:string">
+                  <xs:enumeration value="int" />
+                  <xs:enumeration value="long" />
+                  <xs:enumeration value="short" />
+                  <xs:enumeration value="float" />
+                  <xs:enumeration value="double" />
+                  <xs:enumeration value="string" />
+                  <xs:enumeration value="boolean" />
+                  <xs:enumeration value="Integer" />
+                  <xs:enumeration value="Long" />
+                  <xs:enumeration value="Short" />
+                  <xs:enumeration value="Float" />
+                  <xs:enumeration value="Double" />
+                  <xs:enumeration value="Boolean" />
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:attribute>
+         <xs:attribute name="default" type="xs:string" />
+      </xs:complexType>
+   </xs:element>
+</xs:schema>
+         

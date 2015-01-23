@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qiao-config>
+
+
+   <funnel id="funnelA" emitter-threads="${funnelA-emitter-threadcount}">
+
+      <injector id="randIntegerA" class="com.aol.advertising.qiao.injector.RandomIntegerDataSource">
+         <property name="maxValue" value="${logproducer.random.max}" type="int" />
+         <property name="targetRate" value="${logproducer.injector.rate.limit}" type="int" />
+      </injector>
+
+      <emitter id="echoA" class="com.aol.advertising.qiao.emitter.EchoDataSink" />
+   </funnel>
+
+</qiao-config>

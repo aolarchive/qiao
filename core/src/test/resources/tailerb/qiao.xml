@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qiao-config>
+
+   <funnel id="tailer" emitter-threads="1">
+
+      <injector id="fileTailerSource" class="com.aol.advertising.qiao.injector.FileTailer">
+         <property name="filename" value="${fileTailer.filename}" />
+         <property name="cacheDir" value="${filterTailer.persistent.cache.dir}" />
+         <property name="cacheName" value="${filterTailer.persistent.cache.name}" />
+         <property name="tailerMode" value="${filterTailer.tailmode}" />
+         <property name="dataHandler" ref="binDataHandler" />
+      </injector>
+
+      <emitter id="echoSink1" class="com.aol.advertising.qiao.emitter.EchoDataSink" />
+
+   </funnel>
+
+</qiao-config>

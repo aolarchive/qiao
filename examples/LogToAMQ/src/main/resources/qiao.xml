@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qiao-config>
+
+
+   <funnel id="TailFunnel" auto-start="${LogTailer-autostart}" emitter-threads="${emitter.amq.numConnections}">
+
+      <injector id="tailInjector" class="com.aol.advertising.qiao.injector.TailInjector">
+         <property name="filename" value="${tailinjector.filename}" />
+         <property name="tailMode" value="${tailinjector.tailmode}" />
+         <property name="filePattern" value="${tailinjector.filepattern}" />
+         <property name="dataHandler" ref="binDataHandler" />
+      </injector>
+
+      <emitter id="amqEmitter" class="com.aol.advertising.qiao.emitter.AMQEmitter">
+         <property name="brokerURL" value="${emitter.amq.brokerURL}" />
+         <property name="destinationName" value="${emitter.amq.destinationName}" />
+      </emitter>
+
+   </funnel>
+
+   <funnel id="FileFunnel" rate-limit="${FilesFunnel-rate-limit}" auto-start="${FilesFunnel-autostart}" qsize="${FilesFunnel-dataPipeCapacity}">
+
+      <injector id="fileInjector" class="com.aol.advertising.qiao.injector.PatternMatchFileInjector" initPositionsFrom="tailInjector">
+         <property name="readMode" value="${fileinjector.readmode}" />
+         <property name="dataHandler" ref="binDataHandler" />
+         <property name="srcDir" value="${fileinjector.srcDir}" />
+         <property name="filePattern" value="${fileinjector.filePattern}" />
+      </injector>
+
+      <!-- <emitter id="echo" class="com.aol.advertising.qiao.emitter.EchoDataSink" /> -->
+      
+      <emitter id="amqEmitter" class="com.aol.advertising.qiao.emitter.AMQEmitter">
+         <property name="brokerURL" value="${emitter.amq.brokerURL2}" />
+         <property name="destinationName" value="${emitter.amq.destinationName2}" />
+      </emitter>
+
+   </funnel>
+
+
+
+</qiao-config>
