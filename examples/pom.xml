@@ -34,7 +34,7 @@
       <metrics.version>3.0.1</metrics.version>
       <amq.version>5.8.0-patched</amq.version>
       <saf.version>2.7</saf.version>
-      <qiao.version>1.0-SNAPSHOT</qiao.version>
+      <qiao.version>1.2</qiao.version>
 
    </properties>
 
