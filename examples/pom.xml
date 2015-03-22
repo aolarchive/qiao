@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
-   <groupId>com.aol.advertising.qiao</groupId>
+   <groupId>qiao</groupId>
    <artifactId>qiao-example-pom</artifactId>
    <packaging>pom</packaging>
-   <version>1.0</version>
+   <version>0.2</version>
    <name>QIAO Example</name>
    <modules>
       <module>LogToAMQ</module>
@@ -32,9 +32,8 @@
       <log4j.version>1.2.17</log4j.version>
       <junit.version>4.11</junit.version>
       <metrics.version>3.0.1</metrics.version>
-      <amq.version>5.8.0-patched</amq.version>
-      <saf.version>2.7</saf.version>
-      <qiao.version>1.2</qiao.version>
+      <amq.version>5.8.0</amq.version>
+      <qiao.version>0.2</qiao.version>
 
    </properties>
 
@@ -48,7 +47,7 @@
 
    <dependencies>
       <dependency>
-         <groupId>com.aol.advertising.qiao</groupId>
+         <groupId>qiao</groupId>
          <artifactId>qiao-core</artifactId>
          <version>${qiao.version}</version>
       </dependency>
@@ -172,17 +171,6 @@
          <artifactId>disruptor</artifactId>
          <version>3.2.0</version>
       </dependency>
-      <dependency>
-         <groupId>com.aol.advertising.saf</groupId>
-         <artifactId>saf-core</artifactId>
-         <version>${saf.version}</version>
-         <exclusions>
-            <exclusion>
-               <artifactId>*</artifactId>
-               <groupId>*</groupId>
-            </exclusion>
-         </exclusions>
-      </dependency>
-   </dependencies>
+    </dependencies>
 </project>
 
