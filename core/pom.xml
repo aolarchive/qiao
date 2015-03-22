@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.aol.advertising.qiao</groupId>
+	<groupId>qiao</groupId>
 	<artifactId>qiao-core</artifactId>
 	<packaging>jar</packaging>
-	<version>1.2</version>
+	<version>0.2</version>
 	<name>QIAO Log Streamer</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,8 +27,7 @@
 		<junit.version>4.11</junit.version>
 		<powermock.version>1.5.4</powermock.version>
 		<metrics.version>3.0.1</metrics.version>
-		<amq.version>5.8.0-patched</amq.version>
-		<saf.version>2.8.2</saf.version>
+		<amq.version>5.8.0</amq.version>
 
 	</properties>
 
@@ -242,17 +241,6 @@
 			<groupId>com.lmax</groupId>
 			<artifactId>disruptor</artifactId>
 			<version>3.2.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.aol.advertising.saf</groupId>
-			<artifactId>saf-core</artifactId>
-			<version>${saf.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>*</artifactId>
-					<groupId>*</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
