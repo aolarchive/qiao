@@ -7,8 +7,10 @@
       <injector id="tailInjector" class="com.aol.advertising.qiao.injector.TailInjector">
          <property name="filename" value="${tailinjector.filename}" />
          <property name="tailMode" value="${tailinjector.tailmode}" />
-         <property name="filePattern" value="${tailinjector.filepattern}" />
          <property name="dataHandler" ref="binDataHandler" />
+         <property name="bufSize" value="${tailinjector.readBufferSize}" type="int" />
+         <property name="checksumByteLength" value="${tailinjector.checksumByteLength}" type="int" />
+         <property name="cacheDefaultExpirySecs" value="${tailInjector.positionCache.defaultExpirySecs}" type="int" />
       </injector>
 
       <emitter id="kafkaEmitter" class="com.aol.advertising.qiao.emitter.KafkaEmitter">
@@ -19,6 +21,7 @@
          <property name="serializerClassname" value="kafka.serializer.StringEncoder" />
          <property name="keySerializerClassname" value="com.aol.advertising.qiao.emitter.kafka.LongSerializer" />
          <property name="messageHandler" ref="stringEventHandler" />
+         <property name="partitionerClassname" value="com.aol.advertising.qiao.emitter.kafka.partitioner.RoundRobinPartitioner" />
       </emitter>
 
    </funnel>
