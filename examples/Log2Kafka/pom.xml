@@ -52,13 +52,7 @@
          </plugin>
       </plugins>
    </build>
-   <repositories>
-      <repository>
-         <id>aol-cm</id>
-         <name>AOL CM Nexus</name>
-         <url>http://cmmaven.cm.aol.com:8081/nexus/content/groups/public/</url>
-      </repository>
-   </repositories>
+
    <dependencies>
       <dependency>
          <groupId>org.slf4j</groupId>

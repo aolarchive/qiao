@@ -84,24 +84,15 @@
 	</build>
 
 	<repositories>
-		<repository>
-			<id>aol-cm</id>
-			<name>AOL CM Nexus</name>
-			<url>http://cmmaven.cm.aol.com:8081/nexus/content/groups/public/</url>
-		</repository>
+	    <repository>
+	      <snapshots>
+	        <enabled>false</enabled>
+	      </snapshots>
+	      <id>central</id>
+	      <name>Maven Repository Switchboard</name>
+	      <url>http://repo1.maven.org/maven2</url>
+	    </repository>	
 	</repositories>
-	<distributionManagement>
-		<repository>
-			<id>aol-advertising-releases</id>
-			<name>AOL QIAO: Releases</name>
-			<url>http://cmmaven.cm.aol.com:8081/nexus/content/repositories/aol-advertising/</url>
-		</repository>
-		<snapshotRepository>
-			<id>aol-advertising-snapshots</id>
-			<name>AOL QIAO: Snapshots</name>
-			<url>http://cmmaven.cm.aol.com:8081/nexus/content/repositories/aol-advertising-snaps/</url>
-		</snapshotRepository>
-	</distributionManagement>
 
 	<dependencies>
 		<dependency>

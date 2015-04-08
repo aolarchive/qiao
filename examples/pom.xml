@@ -38,11 +38,14 @@
    </properties>
 
    <repositories>
-      <repository>
-         <id>aol-cm</id>
-         <name>AOL CM Nexus</name>
-         <url>http://cmmaven.cm.aol.com:8081/nexus/content/groups/public/</url>
-      </repository>
+       <repository>
+         <snapshots>
+           <enabled>false</enabled>
+         </snapshots>
+         <id>central</id>
+         <name>Maven Repository Switchboard</name>
+         <url>http://repo1.maven.org/maven2</url>
+       </repository> 
    </repositories>
 
    <dependencies>
