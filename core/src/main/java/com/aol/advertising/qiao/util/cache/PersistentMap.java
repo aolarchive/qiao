@@ -1,18 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ytung05
  *
- * Copyright (c) 2011-2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   PersistentMap.java  
- * Description:
- * @author:     ytung
- * @version:    2.5
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 package com.aol.advertising.qiao.util.cache;
 
@@ -62,7 +62,7 @@ import com.sleepycat.je.Transaction;
  * periodically evicts expired entries. In addition, if the map is configured to
  * be bounded, entries in excess of the max size can be evicted by the reaper
  * based on LRU (Least-Recently-Used) policy.
- * 
+ *
  */
 @ManagedResource(description = "Local Persistent Cache Store")
 public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
@@ -90,7 +90,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
     private long lastEvictTime;
     // private boolean enableEvictOnSet = false; // disable by default
     private AtomicBoolean evictInProgress = new AtomicBoolean(false);
-    // 
+    //
     private int highWaterMark = 0;
     private int lowWaterMark = 0;
     //
@@ -415,7 +415,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
     /**
      * Returns the value to which the specified key is mapped in the cache, or
      * null if this cache contains no mapping for the key.
-     * 
+     *
      * @param key
      * @return the mapped value of the given key
      */
@@ -467,7 +467,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
     /**
      * Returns the value to which the specified key is mapped in the cache, or
      * null if this cache contains no mapping for the key.
-     * 
+     *
      * @param key
      * @param refreshExpiry
      *            true to reset the entry's expiry time
@@ -519,7 +519,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
      * Get the value associated with the given key and reset the entry's expiry
      * to the specific expiration time. Returns null if this cache contains no
      * mapping for such a key.
-     * 
+     *
      * @param key
      * @param expirationTime
      *            the new expiration value
@@ -584,7 +584,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
      * Returns the value associated with the given key and reset the entry's
      * expiration time regardless of the setting of refreshExpiryOnAccess.
      * Returns null if this cache contains no mapping for such a key.
-     * 
+     *
      * @param key
      * @return the mapped value of the given key
      */
@@ -625,7 +625,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * Explicitly set modified flag of entry with the given key.
-     * 
+     *
      * @param key
      */
     public void setModifiedFlag(final K key, final boolean flag)
@@ -686,7 +686,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
      * Returns the wrapper object mapped to the given key. This is for internal
      * use. It does not touch the last access time. In addition, it does not
      * notify cache listeners.
-     * 
+     *
      * @param key
      * @return the wrapper object
      */
@@ -709,7 +709,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * Adds a listener for the eviction process.
-     * 
+     *
      * @param l
      */
     public void addEvictionListener(IEvictionListener<K, W> l)
@@ -720,7 +720,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * Adds a listener for the update process.
-     * 
+     *
      * @param l
      */
     public void addUpdateListener(IUpdateListener<K, W> l)
@@ -731,7 +731,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * Removes the listener from the eviction process.
-     * 
+     *
      * @param l
      */
     public void removeEvictionListener(IEvictionListener<K, W> l)
@@ -742,7 +742,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * Removes the listener from the update process.
-     * 
+     *
      * @param l
      */
     public void removeUpdateListener(IUpdateListener<K, W> l)
@@ -761,7 +761,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
      * Returns the item count of the map currently on the disk. It may include
      * expired items which have not been removed yet until next cleanup cycle.
      * This operation is considered expensive.
-     * 
+     *
      * @return returns the item count on the disk belonging to this map.
      */
     @ManagedAttribute
@@ -793,7 +793,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * Returns true if reaping process is enabled for removing expiry entries.
-     * 
+     *
      * @return true if reaping process is enabled for removing expiry entries.
      */
     @ManagedAttribute
@@ -805,7 +805,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * Runs the reaper every interval seconds, evicts expired items
-     * 
+     *
      * @param interval
      *            number of seconds
      */
@@ -1052,7 +1052,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
     /**
      * Looks up the value of the given key. This operation does not reset the
      * expiry time.
-     * 
+     *
      * @param key
      * @return the value mapped to the given key, or null if not found.
      */
@@ -1210,7 +1210,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
      * Returns the high water mark of the cache. The system will start ejecting
      * values out of memory when this watermark is met. Ejected values need to
      * be fetched from disk, when accessed. A value of 0 means it is unbounded.
-     * 
+     *
      * @return the high water mark value
      */
     @ManagedAttribute
@@ -1236,7 +1236,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
      * Returns the low water mark of this cache. The system does not do anything
      * when this watermark is reached but this is the 'goal' of the system when
      * it starts ejecting data as a result of high watermark being met.
-     * 
+     *
      * @return the low water mark of this cache
      */
     @ManagedAttribute
@@ -1251,7 +1251,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
      * when this watermark is reached but this is the 'goal' of the system when
      * it starts ejecting data as a result of high watermark being met. If set
      * to 0, the system will set low water mark to 90% value of high water mark.
-     * 
+     *
      * @param lowWatermark
      */
     public void setLowWaterMark(int lowWatermark)
@@ -1524,7 +1524,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
     /**
      * Starts a transaction. To commit the transaction, call
      * commitTransaction().
-     * 
+     *
      * @return the handle to the transaction, or null if unable to start a
      *         transaction.
      */
@@ -1550,7 +1550,7 @@ public class PersistentMap<K, W extends PersistentValueWrapper<K, ? >> extends
 
     /**
      * This method is deprecated. Use commitTransaction instead.
-     * 
+     *
      * @param transaction
      */
     @Deprecated

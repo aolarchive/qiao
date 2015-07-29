@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   TextFileTailer.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector.file;
@@ -32,7 +33,7 @@ public class TextBlockFileReader extends AbstractFileReader<String>
 
     /**
      * Creates a Tailer for the given file, with a specified buffer size.
-     * 
+     *
      * @param file
      *            the file to follow.
      * @param delayMillis
@@ -53,7 +54,7 @@ public class TextBlockFileReader extends AbstractFileReader<String>
 
     /**
      * Creates and starts a Tailer for the given file.
-     * 
+     *
      * @param file
      *            the file to follow.
      * @param delayMillis
@@ -135,7 +136,7 @@ public class TextBlockFileReader extends AbstractFileReader<String>
     /**
      * Read a block of texts. A handler separate the block into lines, This will
      * continue to read until end of stream.
-     * 
+     *
      * @param reader
      *            The file to read
      * @return The new position after a block has been read
@@ -167,7 +168,7 @@ public class TextBlockFileReader extends AbstractFileReader<String>
         {
             for (String line : result)
                 super.invokeCallback(line);
-            
+
             return textSplitter.getPositionAdjustment();
         }
         catch (Exception e)

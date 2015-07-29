@@ -1,18 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ytung05
  *
- * Copyright (c) 2011 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   StatsEvent.java	
- * Description:
- * @author:     ytung
- * @version:    1.0
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.management.metrics;
@@ -48,7 +48,7 @@ public class StatsEvent extends ApplicationEvent
         DECRBY,
         /**
          * Set to the specified value
-         * 
+         *
          */
         SET,
         /**
@@ -119,7 +119,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Get key
-     * 
+     *
      * @return key
      */
     public String getStatKey()
@@ -130,7 +130,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Set metric's key
-     * 
+     *
      * @param statKey
      *            metric's key
      */
@@ -142,7 +142,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Get metric's value
-     * 
+     *
      * @return metric value
      */
     public long getStatValue()
@@ -153,7 +153,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Set metric's value
-     * 
+     *
      * @param statValue
      *            metrics value
      */
@@ -165,7 +165,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Get the publishing source identifier
-     * 
+     *
      * @return the publishing source identifier
      */
     public String getStatSourceId()
@@ -176,7 +176,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Set the publishing source identifier
-     * 
+     *
      * @param statSourceId
      *            the publishing source identifier
      */
@@ -188,7 +188,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Get the operation
-     * 
+     *
      * @return the operation
      */
     public StatsOp getStatOp()
@@ -199,7 +199,7 @@ public class StatsEvent extends ApplicationEvent
 
     /**
      * Set the operation
-     * 
+     *
      * @param statOp
      *            the operation
      */

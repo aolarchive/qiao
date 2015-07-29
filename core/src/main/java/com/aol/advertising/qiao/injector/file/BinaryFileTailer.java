@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   BinaryFileTailer.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector.file;
@@ -26,7 +27,7 @@ import com.aol.advertising.qiao.util.CommonUtils;
 
 /**
  * BinaryFileTailer reads a file in binary format one block at a time.
- * 
+ *
  */
 public class BinaryFileTailer extends AbstractFileTailer<ByteBuffer>
 {
@@ -36,7 +37,7 @@ public class BinaryFileTailer extends AbstractFileTailer<ByteBuffer>
 
     /**
      * Creates a Tailer for the given file, with a specified buffer size.
-     * 
+     *
      * @param file
      *            the file to follow.
      * @param delayMillis
@@ -60,7 +61,7 @@ public class BinaryFileTailer extends AbstractFileTailer<ByteBuffer>
 
     /**
      * Creates and starts a Tailer for the given file.
-     * 
+     *
      * @param file
      *            the file to follow.
      * @param delayMillis
@@ -156,7 +157,7 @@ public class BinaryFileTailer extends AbstractFileTailer<ByteBuffer>
                 else
                 {
                     // wait for new content
-                    CommonUtils.sleepQuietly(pullDelayMillis); // avoid tight loop   
+                    CommonUtils.sleepQuietly(pullDelayMillis); // avoid tight loop
                 }
 
             }
@@ -180,7 +181,7 @@ public class BinaryFileTailer extends AbstractFileTailer<ByteBuffer>
      * Read data blocks. It is up to handler to make sense out of data blocks,
      * parsing, splitting, or transform as needed. It will continue to read
      * until end of stream.
-     * 
+     *
      * @param channel
      *            The file to read
      * @return The new position after the lines have been read

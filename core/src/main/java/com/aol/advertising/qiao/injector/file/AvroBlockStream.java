@@ -1,18 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ashishbh
  *
- * Copyright (c) 2014 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   AvroBlockStream.java    
- * Description:
- * @author:     Ashish Bhatt <Ashish.Bhatt@teamaol.com>
- * @version:    1.0
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector.file;
@@ -58,7 +58,7 @@ public class AvroBlockStream
     /**
      * Initializes the stream by reading the header and parsing the schema from
      * it.
-     * 
+     *
      */
     public AvroBlockStream() throws IOException
     {
@@ -67,8 +67,8 @@ public class AvroBlockStream
 
     /**
      * Reads the schema from the top of avro file
-     * 
-     * 
+     *
+     *
      * @param channel
      * @throws IOException
      */
@@ -103,7 +103,7 @@ public class AvroBlockStream
     /**
      * Always returns the first block start position in the file after the
      * header is read
-     * 
+     *
      * @return
      */
     public int getBlockStartPosition()
@@ -113,7 +113,7 @@ public class AvroBlockStream
 
     /**
      * Discards the remaining data in the buffer
-     * 
+     *
      */
     public void discardRemaining()
     {
@@ -123,7 +123,7 @@ public class AvroBlockStream
     /**
      * Returns true if recordsInBlock and blockSize has already been read from
      * the buffer, false otherwise.
-     * 
+     *
      * @return
      */
     public boolean isBlockInfoRead()
@@ -133,7 +133,7 @@ public class AvroBlockStream
 
     /**
      * Returns the schema of the avro file being processed
-     * 
+     *
      * @return
      */
     public Schema getSchema()
@@ -143,7 +143,7 @@ public class AvroBlockStream
 
     /**
      * Returns the partial block size available in the stream
-     * 
+     *
      * @return
      */
     public int getAvailable()
@@ -162,7 +162,7 @@ public class AvroBlockStream
 
     /**
      * Appends the the buffer to the stream
-     * 
+     *
      * @param data
      * @throws IOException
      */
@@ -253,7 +253,7 @@ public class AvroBlockStream
 
     /**
      * Checks whether the stream has a complete block available
-     * 
+     *
      * @return : true if block is avaible
      * @throws IOException
      */
@@ -328,7 +328,7 @@ public class AvroBlockStream
 
     /**
      * Returns the next complete avro block
-     * 
+     *
      * @return
      * @throws IOException
      */

@@ -1,18 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ytung05
  *
- * Copyright (c) 2011 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   StatsCalculator.java	
- * Description:
- * @author:     ytung
- * @version:    1.0
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.management.metrics;
@@ -147,7 +147,7 @@ public class StatsCalculator implements Runnable,
      * Using Sun's undocumented internal OperatingSystemMXBean is certainly
      * questionable practice for production code. But until there is a better
      * method, it's useful for benchmarking during development.
-     * 
+     *
      * @return the percent CPU time used by the process, or -1 if this operation
      *         is not supported.
      */
@@ -176,7 +176,7 @@ public class StatsCalculator implements Runnable,
 
     /**
      * Set the interval in seconds to perform calculation.
-     * 
+     *
      * @param intervalSecs
      */
     public void setIntervalSecs(long intervalSecs)
@@ -187,7 +187,7 @@ public class StatsCalculator implements Runnable,
 
     /**
      * Set whether or not to write the stats to the log file
-     * 
+     *
      * @param writeToLog
      */
     public void setWriteToLog(boolean writeToLog)
@@ -276,7 +276,7 @@ public class StatsCalculator implements Runnable,
 
     /**
      * Register the callable object to be invoked at each interval.
-     * 
+     *
      * @param c
      */
     public void register(CalcCallable c)
@@ -295,7 +295,7 @@ public class StatsCalculator implements Runnable,
 
     /**
      * Unregister the previously registered callable object.
-     * 
+     *
      * @param c
      */
     public void unregister(CalcCallable c)

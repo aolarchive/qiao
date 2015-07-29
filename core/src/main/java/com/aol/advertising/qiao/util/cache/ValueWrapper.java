@@ -1,18 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ytung05
  *
- * Copyright (c) 2011-2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   ValueWrapper.java	
- * Description:
- * @author:     ytung
- * @version:    2.5
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.util.cache;
@@ -37,7 +37,7 @@ public class ValueWrapper<V> implements Externalizable
     protected long insertionTime;
     protected long lastAccessTime;
 
-    protected int timeout; // when the value can be reaped (in ms) 
+    protected int timeout; // when the value can be reaped (in ms)
 
     protected byte isModified = FALSE;
 
@@ -54,7 +54,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /**
      * Constructor.
-     * 
+     *
      * @param value
      *            the value object
      * @param timeoutSecs
@@ -82,7 +82,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /**
      * Returns the value object.
-     * 
+     *
      * @return the value object
      */
     public V getValue()
@@ -94,7 +94,7 @@ public class ValueWrapper<V> implements Externalizable
     /**
      * Number of milliseconds from the last access time before this object can
      * be reaped.
-     * 
+     *
      * @return the expiration time in milliseconds
      */
     public int getTimeout()
@@ -105,7 +105,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /**
      * Reset the expiration time to the new value.
-     * 
+     *
      * @param timeoutSecs
      *            new expiration time in seconds
      * @return the value object
@@ -121,7 +121,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /**
      * Reset the expiration time.
-     * 
+     *
      * @return the value object
      */
     public V touch()
@@ -133,7 +133,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /**
      * Returns the timestamp this object was last accessed.
-     * 
+     *
      * @return the last access timestamp
      */
     public long getLastAccessTime()
@@ -144,7 +144,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /**
      * check if this object has been modified.
-     * 
+     *
      * @return true if this object has been modified.
      */
     public boolean isModified()
@@ -155,7 +155,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /**
      * Set modification flag to the given value.
-     * 
+     *
      * @param isModified
      */
     public void setModified(boolean isModified)
@@ -166,7 +166,7 @@ public class ValueWrapper<V> implements Externalizable
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.lang.Object#toString()
      */
     public String toString()

@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ashishbh
  *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   BinaryFileTailer.java	
- * Description:
- * @author:     ytung05
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector.file;
@@ -26,7 +27,7 @@ import com.aol.advertising.qiao.util.CommonUtils;
 
 /**
  * BinaryFileTailer reads a file in binary format one block at a time.
- * 
+ *
  */
 public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
 {
@@ -35,7 +36,7 @@ public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
 
     /**
      * Creates a Tailer for the given file, with a specified buffer size.
-     * 
+     *
      * @param file
      *            the file to follow.
      * @param delayMillis
@@ -58,7 +59,7 @@ public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
 
     /**
      * Creates and starts a Tailer for the given file.
-     * 
+     *
      * @param file
      *            the file to follow.
      * @param delayMillis
@@ -89,13 +90,13 @@ public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
 
         FileChannel ch = reader.getChannel();
         boolean file_rotation_detected = false;
-        
+
         try
         {
-            
+
             avroStream = new AvroBlockStream();
             avroStream.readSchema(ch);
-            
+
             long position = this._position.get();
 
             if (logger.isDebugEnabled()) {
@@ -108,7 +109,7 @@ public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
                 // Set to position after header
                 position = avroStream.getBlockStartPosition();
                 _position.set(position);
-                logger.info(">read from offset " + position);   
+                logger.info(">read from offset " + position);
             }
 
             reader.seek(position);
@@ -174,7 +175,7 @@ public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
         catch (Throwable e)
         {
             logger.error("error", e);
-            
+
             if (dataHandler != null)
                 dataHandler.onException(e);
         }
@@ -186,7 +187,7 @@ public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
      * Read data blocks. It is up to handler to make sense out of data blocks,
      * parsing, splitting, or transform as needed. It will continue to read
      * until end of stream.
-     * 
+     *
      * @param channel
      *            The file to read
      * @return The new position after the lines have been read
@@ -203,13 +204,13 @@ public class AvroFileTailer extends AbstractFileTailer<ByteBuffer>
             long rePos = pos; // position to re-read
 
             logger.trace("channel position=" + pos);
-            
+
             while (running && ((channel.read(bytebuf)) != -1))
             {
                 savePositionAndInvokeCallback(bytebuf,
                         rePos = channel.position());
                 bytebuf.clear();
-                
+
             }
             channel.position(rePos); // // Ensure we can re-read if necessary
             return rePos;

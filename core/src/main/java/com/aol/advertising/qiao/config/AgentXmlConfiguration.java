@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   AgentXmlConfiguration.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.config;
@@ -171,7 +172,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
      * way Apache Commons Configuration treats property keys, user should avoid
      * using dot ('.') in the property key. Otherwise ACC may not substitute
      * some value if the variable contains valid element name(s).
-     * 
+     *
      * @param xmlConfigFile
      * @param propConfigFiles
      * @return
@@ -237,7 +238,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     /**
      * Parse xml and build an config object. The returned object preserves the
      * order the elements appears in the xml files.
-     * 
+     *
      * @param key
      * @return
      */

@@ -1,18 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ytung05
  *
- * Copyright (c) 2011-2012 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   PersistentCache.java	
- * Description:
- * @author:     ytung
- * @version:    2.0.1
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.util.cache;
@@ -50,7 +50,7 @@ import com.sleepycat.je.Transaction;
  * periodically evicts expired entries. In addition, if this is configured to be
  * bounded, entries in excess of the max size can be evicted by the reaper based
  * on LRU (Least-Recently-Used) policy.
- * 
+ *
  * @param <K>
  * @param <V>
  */
@@ -184,7 +184,7 @@ public class PersistentCache<K, V> implements ICache<K, V>,
 	/**
 	 * Stores the specified key to the specified value in this cache. Neither
 	 * the key nor the value can be null.
-	 * 
+	 *
 	 * @param key
 	 * @param val
 	 * @param expirySecs
@@ -210,7 +210,7 @@ public class PersistentCache<K, V> implements ICache<K, V>,
 	/**
 	 * If the specified key is not already associated with a value, associate it
 	 * with the given value.
-	 * 
+	 *
 	 * @param key
 	 * @param value
 	 * @param expirySecs
@@ -234,7 +234,7 @@ public class PersistentCache<K, V> implements ICache<K, V>,
 
 	/**
 	 * Replaces the entry for a key only if currently mapped to some value.
-	 * 
+	 *
 	 * @param key
 	 * @param value
 	 * @param expirationTime
@@ -269,7 +269,7 @@ public class PersistentCache<K, V> implements ICache<K, V>,
 	/**
 	 * Get the value of the specific key. Optionally to reset the expiry time of
 	 * the item stored on disk if refreshExpiry is true.
-	 * 
+	 *
 	 * @param key
 	 * @param refreshExpiry
 	 * @return the value to which the specified key is mapped, or null if this
@@ -353,7 +353,7 @@ public class PersistentCache<K, V> implements ICache<K, V>,
 	/**
 	 * Get the number of entries in the persistent store. Note that this call is
 	 * expensive. For reporting purpose, it is better to use size().
-	 * 
+	 *
 	 * @return the number of entries in the persistent store.
 	 */
 	public int getDiskItemCount() {
@@ -404,7 +404,7 @@ public class PersistentCache<K, V> implements ICache<K, V>,
 	/**
 	 * Looks up the value of the given key. This operation does not reset the
 	 * expiry time.
-	 * 
+	 *
 	 * @param key
 	 * @return the value mapped to the given key, or null if not found.
 	 */
@@ -631,7 +631,7 @@ public class PersistentCache<K, V> implements ICache<K, V>,
 
 	/**
 	 * This method is deprecated. Use commitTransaction instead.
-	 * 
+	 *
 	 * @param transaction
 	 */
 	public void commit(Transaction transaction) {

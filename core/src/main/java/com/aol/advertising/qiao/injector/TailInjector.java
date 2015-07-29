@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   FileTailerListener.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector;
@@ -65,15 +66,15 @@ import com.aol.advertising.qiao.util.cache.PositionCache;
  * TailInjector reads and follows a file in a way similar to the Unix 'tail -F'
  * command. It supports the following features:
  * <p>
- * 
+ *
  * <pre>
- * A) follows a log when the log rotated, similar to 'tail -F'. 
+ * A) follows a log when the log rotated, similar to 'tail -F'.
  * B) resumes at where it previously left off after QIAO is restarted if the file has not been rotated off.
  * C) starts from the beginning of the file if the previous file has been rotated before QIAO restarts.
- * D) accepts listeners which will be notified whenever a file is open for processing or after a file 
+ * D) accepts listeners which will be notified whenever a file is open for processing or after a file
  *    has been complete.
  * </pre>
- * 
+ *
  * </p>
  * <p>
  * Note that this class requires a directory in the file system to store the
@@ -87,7 +88,7 @@ import com.aol.advertising.qiao.util.cache.PositionCache;
  * optional. By default data is broken up line by line (a single ‘line’ of text
  * followed by line feed (‘\n’)).
  * </p>
- * 
+ *
  * @param <T>
  *            data buffer format: String or ByteBuffer
  */
@@ -138,7 +139,7 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
     private StatsCalculator statsCalculator;
     private Map<String, PubStats> counterKeys = new LinkedHashMap<String, PubStats>();
 
-    private QiaoFileBookKeeper bookKeeper; // notified when complete processing the current file after rotated off 
+    private QiaoFileBookKeeper bookKeeper; // notified when complete processing the current file after rotated off
     private boolean enableFileWatcher = true;
     private int checksumByteLength = 2048;
 
@@ -565,7 +566,7 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
      * Set user data handler (optional). For TailerMode.BINARY, entire buffer is
      * passed to the data handler. For TailerMode.TEXTBLOCK, a data block is
      * split by line-end(s) before passing them to data handler.
-     * 
+     *
      * @param dataHandler
      */
     public void setDataHandler(ITailerDataHandler<T> dataHandler)
@@ -593,7 +594,7 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
 
     /**
      * For internal use.
-     * 
+     *
      * @param callback
      */
     public void setCallback(ICallback callback)
@@ -796,7 +797,7 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
     /**
      * Register listener to be notified if a file is open or finished. Note that
      * only those listeners registered before init() will be notified.
-     * 
+     *
      * @param listener
      */
     public void registerListener(IFileOperationListener listener)

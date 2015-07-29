@@ -1,18 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
+ * Copyright (c) 2015 AOL Inc.
+ * @author:     ytung05
  *
- * Copyright (c) 2011-2012 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- ****************************************************************************
- * Department:  AOL Advertising
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * File Name:   RateLimiter.java	
- * Description:
- * @author:     ytung
- * @version:    2.0.1
- *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.util;
@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
  *       // dispatch an event
  *       ...
  *    }
- *    
+ *
  *    r.destroy();  // release resources
  * </code>
  */
@@ -74,7 +74,7 @@ public class RateLimiter implements Runnable
 
     /**
      * Gets a new instance of RateLimiter which supports the given rate.
-     * 
+     *
      * @param requestsPerSec
      *            maximum requests can be granted per second
      * @return an instance of RateLimiter
@@ -103,7 +103,7 @@ public class RateLimiter implements Runnable
     /**
      * Acquires a permit from this instance, blocking until the request can be
      * granted.
-     * 
+     *
      * @throws InterruptedException
      */
     public void acquire() throws InterruptedException
@@ -173,14 +173,14 @@ public class RateLimiter implements Runnable
     public void modifyRate(int newRate)
     {
         suspend();
-               
+
         maxPermitsPerSec = newRate;
         intervalNanos = TOT_NANOS / maxPermitsPerSec;
         logger.debug("time period between permits (nanos): " + intervalNanos);
 
         availables = new Semaphore(maxPermitsPerSec);
         startOfCurrentPeriod = System.nanoTime();
-        
+
         resume();
     }
 }

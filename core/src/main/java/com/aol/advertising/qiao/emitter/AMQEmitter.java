@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   AMQEmitter.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.emitter;
@@ -105,7 +106,7 @@ public class AMQEmitter extends AbstractDataEmitter implements
     private String destinationName;
     private Destination destination;
     private boolean isQueue = true;
-    private int numProducer = 1; // one producer per session per connection 
+    private int numProducer = 1; // one producer per session per connection
     private boolean transacted = false;
     private int ackMode = Session.AUTO_ACKNOWLEDGE;
     private int deliveryMode;
@@ -224,7 +225,7 @@ public class AMQEmitter extends AbstractDataEmitter implements
     /**
      * Create JMS connectins, sessions, producers, destination objects. (one
      * producer per connection)
-     * 
+     *
      * @throws Exception
      */
     protected void createJmsResources() throws Exception
@@ -389,7 +390,7 @@ public class AMQEmitter extends AbstractDataEmitter implements
 
     /**
      * Required to properly create the message from an event.
-     * 
+     *
      * @param msgCreator
      */
 

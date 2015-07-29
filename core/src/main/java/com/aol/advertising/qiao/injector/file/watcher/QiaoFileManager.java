@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2014 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   QiaoFileManager.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector.file.watcher;
@@ -55,7 +56,7 @@ import com.aol.advertising.qiao.util.FileFinder;
  * Iterate through files whose names match a predefined pattern at the specific
  * source directory. If a file has been completely injected, move the file to
  * done directory.
- * 
+ *
  */
 @ManagedResource
 public class QiaoFileManager implements Runnable, ISuspendable,
@@ -324,7 +325,7 @@ public class QiaoFileManager implements Runnable, ISuspendable,
 
     /**
      * Find a file matching with the defined pattern from the source directory.
-     * 
+     *
      * @return
      * @throws IOException
      */
@@ -421,7 +422,7 @@ public class QiaoFileManager implements Runnable, ISuspendable,
 
     /**
      * The source directory for the injector to locate files.
-     * 
+     *
      * @param srcDir
      */
     public void setSrcDir(String srcDir)
@@ -433,7 +434,7 @@ public class QiaoFileManager implements Runnable, ISuspendable,
     /**
      * A global pattern to be matched against the string representation of a
      * file's name. For example, "adserver.log.1.*".
-     * 
+     *
      * @param filePattern
      */
     public void setFilePattern(String filePattern)
@@ -445,7 +446,7 @@ public class QiaoFileManager implements Runnable, ISuspendable,
     /**
      * Number of milliseconds to wait until next check for file's availability
      * when directory is empty or none matches.
-     * 
+     *
      * @param fileCheckDelayMillis
      */
     public void setFileCheckDelayMillis(long fileCheckDelayMillis)
@@ -606,14 +607,14 @@ public class QiaoFileManager implements Runnable, ISuspendable,
     @Override
     public void onDelete(Path file)
     {
-        // do nothing        
+        // do nothing
     }
 
 
     @Override
     public void onModify(Path file)
     {
-        // do nothing        
+        // do nothing
     }
 
 
@@ -650,7 +651,7 @@ public class QiaoFileManager implements Runnable, ISuspendable,
 
     /**
      * Add the event to the queue - a blocking operation.
-     * 
+     *
      * @param event
      */
     public void addToQueue(FileOperationEvent event)
@@ -667,7 +668,7 @@ public class QiaoFileManager implements Runnable, ISuspendable,
 
     /**
      * Add the event to the queue - a non-blocking operation.
-     * 
+     *
      * @param event
      */
     public boolean addToQueueIfNotFull(FileOperationEvent event)

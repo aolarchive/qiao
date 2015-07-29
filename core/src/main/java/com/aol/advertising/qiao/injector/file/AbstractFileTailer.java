@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   AbstractFileTailer.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector.file;
@@ -48,7 +49,7 @@ import com.sleepycat.je.Transaction;
 /**
  * This abstract class that reads and follows a file in a way similar to Unix
  * 'tail -F' command.
- * 
+ *
  * @param <T>
  *            data format of the file: String or ByteBuffer
  */
@@ -60,7 +61,7 @@ public abstract class AbstractFileTailer<T> implements ITailer<T>,
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected final byte[] inbuf; // Buffer on top of RandomAccessFile
-    protected final File tailedFile; // The file which will be tailed   
+    protected final File tailedFile; // The file which will be tailed
     protected final long delayMillis; // The amount of time to wait for the file to be updated
     protected final int bufSize; // buffer size
     protected FileReadingPositionCache _position; // current read position from the beginning of the file
@@ -143,13 +144,13 @@ public abstract class AbstractFileTailer<T> implements ITailer<T>,
     /**
      * Follows changes in the file, calling the callback's handle method for
      * each new line or new block.
-     * 
+     *
      * <pre>
      * - Open the file
      * - Compute the checksum of the file
      * - Set read position
      * - Lock the file using the checksum
-     * - Process the file until file is done and a new file is created 
+     * - Process the file until file is done and a new file is created
      * - Notify listeners on complete
      * - Unlock the file
      * </pre>
@@ -166,7 +167,7 @@ public abstract class AbstractFileTailer<T> implements ITailer<T>,
         {
             reader = prepareFileToRead(tailedFile);
 
-            // get last read position via checksum. 
+            // get last read position via checksum.
             FileReadingPositionCache.FileReadState fstate = _position
                     .getReadState();
             logger.info(String
@@ -253,7 +254,7 @@ public abstract class AbstractFileTailer<T> implements ITailer<T>,
     /**
      * Open the file to read, notify listeners, add checksum to position cache,
      * and lock the file.
-     * 
+     *
      * @param tailedFile
      * @return RandomAccessFile for tailedFile, or null if interrupted.
      * @throws QiaoOperationException
@@ -564,7 +565,7 @@ public abstract class AbstractFileTailer<T> implements ITailer<T>,
 
     /**
      * Return the file.
-     * 
+     *
      * @return the file
      */
     @Override
@@ -583,7 +584,7 @@ public abstract class AbstractFileTailer<T> implements ITailer<T>,
 
     /**
      * Return the delay in milliseconds.
-     * 
+     *
      * @return the delay in milliseconds.
      */
     public long getDelay()
@@ -611,7 +612,7 @@ public abstract class AbstractFileTailer<T> implements ITailer<T>,
 
     public String getCurrentFileModTimeAndReadTime()
     {
-        // take snapshot 
+        // take snapshot
         long mod_time = tailedFile.lastModified();
         long read_time = _position.getLastTimestamp();
         long file_crc = getCurrentFileChecksum();

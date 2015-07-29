@@ -1,17 +1,18 @@
 /****************************************************************************
- * AOL CONFIDENTIAL INFORMATION
- *
- * Copyright (c) 2013 AOL Inc.  All Rights Reserved.
- * Unauthorized reproduction, transmission, or distribution of
- * this software is a violation of applicable laws.
- *
- ****************************************************************************
- * Department:  AOL Advertising
- *
- * File Name:   AbstractFileTailer.java	
- * Description:
+ * Copyright (c) 2015 AOL Inc.
  * @author:     ytung05
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ****************************************************************************/
 
 package com.aol.advertising.qiao.injector.file;
@@ -38,7 +39,7 @@ import com.sleepycat.je.Transaction;
 
 /**
  * An abstract class that reads a file.
- * 
+ *
  * @param <T>
  *            data format of the file: String or ByteBuffer
  */
@@ -49,7 +50,7 @@ public abstract class AbstractFileReader<T> implements IFileReader<T>
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected final byte[] inbuf; // Buffer on top of RandomAccessFile
-    protected File tailedFile; // The file which will be tailed   
+    protected File tailedFile; // The file which will be tailed
     protected final int bufSize; // buffer size
     protected FileReadingPositionCache readPosition; // current read position from the beginning of the file
     protected final ITailerDataHandler<T> dataHandler; // user-supplied data handling routine
@@ -306,7 +307,7 @@ public abstract class AbstractFileReader<T> implements IFileReader<T>
             int pos_adj = invokeCallback(data);
             if (pos_adj != 0)
                 pos += pos_adj; // adjust position to end of last record.  in case of Qiao restarts, we can position the file to the proper record boundary.
-            
+
             //System.out.println("pos adjustment: " + pos_adj); // trace
 
             boolean saved = setPosition(pos);
@@ -429,7 +430,7 @@ public abstract class AbstractFileReader<T> implements IFileReader<T>
 
     /**
      * Return the file.
-     * 
+     *
      * @return the file
      */
     @Override
@@ -464,7 +465,7 @@ public abstract class AbstractFileReader<T> implements IFileReader<T>
 
     public String getCurrentFileModTimeAndReadTime()
     {
-        // take snapshot 
+        // take snapshot
         long mod_time = tailedFile.lastModified();
         long read_time = readPosition.getLastTimestamp();
         long file_crc = getCurrentFileChecksum();
