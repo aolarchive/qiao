@@ -11,5 +11,4 @@ Qiao (橋, the Chinese character for “bridge”, pronounced as Chiao) is a sta
 * Java 7
 * Small amount of disk space for cursor position cache and history cache
 
-##TO DO
-* Resolve dependencies that are not accessible from github
+

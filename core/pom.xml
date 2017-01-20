@@ -5,7 +5,7 @@
 	<groupId>qiao</groupId>
 	<artifactId>qiao-core</artifactId>
 	<packaging>jar</packaging>
-	<version>0.2</version>
+	<version>0.3</version>
 	<name>QIAO Log Streamer</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

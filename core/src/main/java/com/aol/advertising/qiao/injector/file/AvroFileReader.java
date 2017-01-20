@@ -21,6 +21,8 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import com.aol.advertising.qiao.exception.QuarantineException;
+
 /**
  * BinaryFileReader reads a file in binary format one block at a time, until it
  * reaches the end of the file.
@@ -109,6 +111,10 @@ public class AvroFileReader extends AbstractFileReader<ByteBuffer>
 
         }
         catch (InterruptedException e)
+        {
+            throw e;
+        }
+        catch (QuarantineException e)
         {
             throw e;
         }

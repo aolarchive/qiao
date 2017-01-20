@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.aol.advertising.qiao.exception.ConfigurationException;
+import com.aol.advertising.qiao.exception.QuarantineException;
 import com.aol.advertising.qiao.management.FileReadingPositionCache;
 import com.aol.advertising.qiao.management.QiaoFileEntry;
 import com.aol.advertising.qiao.util.CommonUtils;
@@ -160,6 +161,10 @@ public abstract class AbstractFileReader<T> implements IFileReader<T>
         }
         catch (InterruptedException e)
         {
+        }
+        catch (QuarantineException e)
+        {
+        	throw e;
         }
         catch (Throwable t)
         {
@@ -320,6 +325,12 @@ public abstract class AbstractFileReader<T> implements IFileReader<T>
                 committed = true;
             }
         }
+        catch (IOException e)
+        {
+            logger.warn("savePositionAndInvokeCallback>"
+                    + e.getClass().getSimpleName() + ":" + e.getMessage());
+            throw new QuarantineException(e);
+        }        
         catch (Exception e)
         {
             logger.warn("savePositionAndInvokeCallback>"
