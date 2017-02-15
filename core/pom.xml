@@ -5,8 +5,44 @@
 	<groupId>qiao</groupId>
 	<artifactId>qiao-core</artifactId>
 	<packaging>jar</packaging>
-	<version>0.3</version>
+	<version>0.3-SNAPSHOT</version>
 	<name>QIAO Log Streamer</name>
+	
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <inceptionYear>2014</inceptionYear>
+
+    <scm>
+        <url>https://github.com/aol/qiao/tree/master/core</url>
+        <connection>scm:git:git://github.com/aol/qiao.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/aol/qiao.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>	
+    
+    <developers>
+        <developer>
+            <id>yumei</id>
+            <name>Yumei Tung</name>
+            <email>yumei.tung@teamaol.com</email>
+        </developer>
+    </developers>
+    
+    <distributionManagement>
+     	<snapshotRepository>
+      		<id>ossrh</id>
+     		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    	</snapshotRepository>
+    	<repository>
+      		<id>ossrh</id>
+      		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    	</repository>
+  	</distributionManagement>
+    
+    
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jdk.version>1.7</jdk.version>
