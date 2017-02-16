@@ -351,6 +351,7 @@
 							</execution>
 						</executions>
 						<configuration>
+						    <skip>${quickbuild}</skip>
 						    <additionalparam>-Xdoclint:none</additionalparam>
 						</configuration>
 					</plugin>
