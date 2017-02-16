@@ -7,20 +7,25 @@
 	<packaging>jar</packaging>
 	<version>0.3-SNAPSHOT</version>
 	<name>QIAO Log Streamer</name>
-	
+	<description>
+        Qiao is a stand-alone service that streams event data from a file such as event log in real-time 
+        and delivers them to one or more destinations in a reliable fashion.    
+    </description>
+    <url>https://github.com/aol/qiao</url>
+    
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0</url>
         </license>
     </licenses>
+    
     <inceptionYear>2014</inceptionYear>
 
     <scm>
         <url>https://github.com/aol/qiao/tree/master/core</url>
         <connection>scm:git:git://github.com/aol/qiao.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/aol/qiao.git</developerConnection>
-        <tag>HEAD</tag>
     </scm>	
     
     <developers>
@@ -40,7 +45,7 @@
       		<id>ossrh</id>
       		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     	</repository>
-  	</distributionManagement>
+    </distributionManagement>
     
     
 	<properties>
@@ -116,6 +121,31 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.6</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 
@@ -287,5 +317,46 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>build-extras</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.4</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.3</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+						    <additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
 
