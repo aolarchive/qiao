@@ -265,7 +265,7 @@
 		<dependency>
 			<groupId>com.sleepycat</groupId>
 			<artifactId>je</artifactId>
-			<version>5.0.104</version>
+			<version>5.0.84</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
