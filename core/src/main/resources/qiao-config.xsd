@@ -3,8 +3,16 @@
    <xs:element name="qiao-config">
       <xs:complexType>
          <xs:sequence>
+            <xs:element ref="agent" minOccurs="1" maxOccurs="unbounded" />
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+   <xs:element name="agent">
+      <xs:complexType>
+         <xs:sequence>
             <xs:element ref="funnel" minOccurs="1" maxOccurs="unbounded" />
          </xs:sequence>
+         <xs:attribute type="xs:string" name="id" use="required" />
       </xs:complexType>
    </xs:element>
    <xs:element name="funnel">
@@ -20,7 +28,7 @@
          <xs:attribute type="xs:string" name="qsize" />
          <xs:attribute type="xs:string" name="rate-limit" />
          <xs:attribute type="xs:string" name="emitter-threads" />
-       </xs:complexType>
+      </xs:complexType>
    </xs:element>
    <xs:element name="injector">
       <xs:complexType>
