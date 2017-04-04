@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <qiao-config>
-
+   <agent id="agent">
    <funnel id="tailer" emitter-threads="1">
 
       <injector id="fileTailerSource" class="com.aol.advertising.qiao.injector.FileTailer">
@@ -14,5 +14,5 @@
       <emitter id="echoSink1" class="com.aol.advertising.qiao.emitter.EchoDataSink" />
 
    </funnel>
-
+   </agent>
 </qiao-config>

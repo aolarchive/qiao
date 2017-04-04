@@ -61,7 +61,6 @@ public class QiaoAgent implements IAgent
         if (bookKeeper != null)
         {
             bookKeeper.init();
-            fileManager = ContextUtils.getBean(QiaoFileManager.class);
             fileManager.setBookKeeper(bookKeeper);
             fileManager.init();
 
@@ -253,6 +252,14 @@ public class QiaoAgent implements IAgent
     {
         logger.info("reset counters...");
         statsManager.resetCounters();
+    }
+
+    public QiaoFileManager getFileManager() {
+        return fileManager;
+    }
+
+    public void setFileManager(final QiaoFileManager fileManager) {
+        this.fileManager = fileManager;
     }
 
 }

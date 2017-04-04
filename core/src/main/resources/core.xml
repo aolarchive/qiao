@@ -24,10 +24,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
    <bean id="agent" class="com.aol.advertising.qiao.agent.QiaoAgent">
       <property name="statsManager" ref="statsManager" />
-   </bean>
-
-   <bean id="agent-2" class="com.aol.advertising.qiao.agent.QiaoAgent">
-      <property name="statsManager" ref="statsManager" />
+      <property name="fileManager" ref="qiaoFileManager" />
    </bean>
 
    <bean id="funnel" class="com.aol.advertising.qiao.agent.DataFunnel" scope="prototype">
