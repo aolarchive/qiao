@@ -306,18 +306,6 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         return fileReadPosition;
     }
 
-
-    private void _setupDoneFileHandler()
-    {
-        doneFileHandler = ContextUtils.getBean(DoneFileHandler.class); // a
-        // singleton
-        // - init
-        // by
-        // file
-        // manager
-    }
-
-
     @SuppressWarnings("unchecked")
     private AbstractFileReader< ? > _createReader() throws Exception
     {
