@@ -22,7 +22,7 @@ public class InjectorConfig
     protected String sourceClassName;
     protected String id;
     protected SingleSubnodeConfiguration sourceConfig;
-
+    protected SingleSubnodeConfiguration doneFileHander;
 
     public String getSourceClassName()
     {
@@ -59,4 +59,11 @@ public class InjectorConfig
         this.sourceConfig = sourceConfig;
     }
 
+    public SingleSubnodeConfiguration getDoneFileHander() {
+        return doneFileHander;
+    }
+
+    public void setDoneFileHander(final SingleSubnodeConfiguration doneFileHander) {
+        this.doneFileHander = doneFileHander;
+    }
 }

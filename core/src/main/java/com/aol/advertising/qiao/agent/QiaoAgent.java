@@ -19,10 +19,12 @@ package com.aol.advertising.qiao.agent;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -44,14 +46,22 @@ public class QiaoAgent implements IAgent
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private List<IFunnel> funnelList;
-    private StatsManager statsManager;
+
     private QiaoFileBookKeeper bookKeeper;
     private QiaoFileManager fileManager;
     private boolean enableFileWatcher = true;
     private FileWatchService fileWatcher;
-
     private AtomicBoolean isSuspended = new AtomicBoolean(false);
 
+    private StatsManager statsManager;
+
+    public StatsManager getStatsManager() {
+        return statsManager;
+    }
+
+    public void setStatsManager(final StatsManager statsManager) {
+        this.statsManager = statsManager;
+    }
 
     @Override
     public void init() throws Exception
@@ -61,7 +71,6 @@ public class QiaoAgent implements IAgent
         if (bookKeeper != null)
         {
             bookKeeper.init();
-            fileManager = ContextUtils.getBean(QiaoFileManager.class);
             fileManager.setBookKeeper(bookKeeper);
             fileManager.init();
 
@@ -82,15 +91,15 @@ public class QiaoAgent implements IAgent
         if (!enableFileWatcher)
             return;
 
-        fileWatcher = ContextUtils.getBean(FileWatchService.class);
+        fileWatcher = new FileWatchService();
         fileWatcher.registerListener(fileManager);
 
         String dir_path = fileManager.getSrcDir();
         if (dir_path != null)
         {
             fileWatcher.setWatchingPath(dir_path,
-                    java.nio.file.StandardWatchEventKinds.ENTRY_CREATE,
-                    java.nio.file.StandardWatchEventKinds.ENTRY_DELETE);
+                java.nio.file.StandardWatchEventKinds.ENTRY_CREATE,
+                java.nio.file.StandardWatchEventKinds.ENTRY_DELETE);
         }
 
         fileWatcher.init();
@@ -145,17 +154,10 @@ public class QiaoAgent implements IAgent
 
     }
 
-
     @Override
     public void setFunnels(List<IFunnel> funnelList)
     {
         this.funnelList = funnelList;
-    }
-
-
-    public void setStatsManager(StatsManager statsManager)
-    {
-        this.statsManager = statsManager;
     }
 
 
@@ -201,7 +203,7 @@ public class QiaoAgent implements IAgent
             catch (Exception e)
             {
                 logger.error(
-                        "failed to start QiaoFileManager: " + e.getMessage(), e);
+                    "failed to start QiaoFileManager: " + e.getMessage(), e);
                 isSuspended.set(true);
                 return;
             }
@@ -255,4 +257,11 @@ public class QiaoAgent implements IAgent
         statsManager.resetCounters();
     }
 
+    public QiaoFileManager getFileManager() {
+        return fileManager;
+    }
+
+    public void setFileManager(final QiaoFileManager fileManager) {
+        this.fileManager = fileManager;
+    }
 }

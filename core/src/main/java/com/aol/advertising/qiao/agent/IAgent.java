@@ -1,6 +1,6 @@
 /****************************************************************************
  * Copyright (c) 2015 AOL Inc.
- * @author:     ytung05
+ * @author: ytung05
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,26 +19,27 @@ package com.aol.advertising.qiao.agent;
 
 import java.util.List;
 
+import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import com.aol.advertising.qiao.management.ISuspendable;
 import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
+import com.aol.advertising.qiao.management.metrics.StatsManager;
 import com.aol.advertising.qiao.util.cache.PositionCache;
 
-public interface IAgent extends ISuspendable
-{
-    public void init() throws Exception;
+public interface IAgent extends ISuspendable {
 
+    void init() throws Exception;
 
-    public void start() throws Exception;
+    void start() throws Exception;
 
+    void shutdown();
 
-    public void shutdown();
+    void setFunnels(List<IFunnel> funnelList);
 
+    void setBookKeeper(QiaoFileBookKeeper bookKeeper);
 
-    public void setFunnels(List<IFunnel> funnelList);
+    void setStatsManager(StatsManager statsManager);
 
-
-    public void setBookKeeper(QiaoFileBookKeeper bookKeeper);
-
+    void setFileManager(QiaoFileManager fileManager);
 
     //public void setPositionCache(PositionCache positionCache);
 

@@ -21,9 +21,14 @@ public interface ConfigConstants
 {
     public static final String PROP_QIAO_CFG_DIR = "qiao.config.dir";
 
-    public static final String CFGKEY_FUNNEL = "funnel";
-    public static final String CFGKEY_FUNNEL_INJECTOR = "funnel(%d).injector";
-    public static final String CFGKEY_FUNNEL_EMITTER = "funnel(%d).emitter";
+    public static final String CFGKEY_AGENT = "agent";
+    public static final String CFGKEY_FUNNEL = "agent(%d).funnel";
+    public static final String CFGKEY_FILE_MANAGER = "agent(%d).fileManager";
+    public static final String CFGKEY_FUNNEL_INJECTOR = "agent(%d).funnel(%d).injector";
+    public static final String CFGKEY_FUNNEL_EMITTER = "agent(%d).funnel(%d).emitter";
+    public static final String CFGKEY_FILE_MANAGER_QUARANTINE_FILE_HANDLER = "agent(%d).fileManager.quarantineFileHandler";
+    public static final String CFGKEY_FILE_MANAGER_DONE_FILE_HANDLER = "agent(%d).fileManager.doneFileHandler";
+    public static final String CFGKEY_FILE_BOOK_KEPPER = "agent(%d).fileBookKeeper";
 
     public static final String CFGKEY_PROPERTY_TEMPLATE = "%s(%d).property";
     public static final String CFGATTR_CLASSNAME = "class";
@@ -54,5 +59,6 @@ public interface ConfigConstants
     public static final String NULL_EVENT_CLASS = "NULL_EVENT_CLASS_HOLDER";
     //
     public static final String QIAO = "QIAO ";
+
 
 }
