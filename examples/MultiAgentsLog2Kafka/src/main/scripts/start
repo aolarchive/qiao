@@ -1,0 +1,41 @@
+#!/bin/sh
+#--------------+
+# START SCRIPT |
+#--------------+
+#
+# Customize the following variables:
+# QIAO_HOME: full path of application's installation directory
+export QIAO_HOME=$PWD
+# JAVA_HOME: Java7 home directory
+export JAVA_HOME=/usr/java/jdk1.7.0_45
+# MEMSIZE: application's java max virtual memory size
+VMSIZE=1G
+NEWSIZE=256M
+# JMX port number
+JMXPORT=9983
+
+
+# ---------------------------------------------------------------------
+
+LIB=$QIAO_HOME/lib
+CLASSPATH=$QIAO_HOME/conf
+for f in $LIB/*.jar; do
+  if [ -f $f ]; then
+    CLASSPATH=${CLASSPATH}:$f
+  fi
+done
+
+export CLASSPATH
+MAIN_CLASS=com.aol.advertising.qiao.bootstrap.Bootstrap
+PID_FILE=qiao.PID
+QIAO_CFG=$QIAO_HOME/conf
+
+JAVA_OPTS="-Xmx$VMSIZE -Xms$VMSIZE -XX:NewSize=$NEWSIZE -XX:MaxNewSize=$NEWSIZE -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+UseCMSInitiatingOccupancyOnly -XX:+CMSConcurrentMTEnabled -XX:+CMSScavengeBeforeRemark -XX:CMSInitiatingOccupancyFraction=30" 
+JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true"
+
+JAVA_OPTS="-Dqiao.config.dir=$QIAO_CFG -Dqiao.home=$QIAO_HOME $JAVA_OPTS"
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=$JMXPORT -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+
+$JAVA_HOME/bin/java $JAVA_OPTS -cp $CLASSPATH $MAIN_CLASS 2>&1>> $QIAO_HOME/logs/qiao.out &
+echo $! > $PID_FILE
+cat $PID_FILE

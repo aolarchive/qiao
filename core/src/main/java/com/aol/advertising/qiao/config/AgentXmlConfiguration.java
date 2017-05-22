@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import com.aol.advertising.qiao.config.PropertyValue.DataType;
 import com.aol.advertising.qiao.config.PropertyValue.Type;
-import com.aol.advertising.qiao.config.QiaoConfig.FunnelComponents;
 import com.aol.advertising.qiao.exception.ConfigurationException;
 import com.aol.advertising.qiao.util.CommonUtils;
 import com.aol.advertising.qiao.util.XmlConfigUtil;
@@ -76,37 +75,69 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     {
         qiaoConfig = new QiaoConfig();
 
-        MultiSubnodeConfiguration tmp = loadMutiNodeConfigAndProperties(ConfigConstants.CFGKEY_FUNNEL);
-        if (tmp == null)
+        MultiSubnodeConfiguration agentsConfig = loadMutiNodeConfigAndProperties(ConfigConstants.CFGKEY_AGENT);
+        if (agentsConfig == null)
         {
-            logger.warn(ConfigConstants.CFGKEY_FUNNEL + " not configured");
+            logger.warn(ConfigConstants.CFGKEY_AGENT + " not configured");
         }
         else
         {
-            qiaoConfig.setFunnelConfig(tmp);
-            Map<String, String> classnames = getClassNames(tmp);
-            qiaoConfig.setFunnelClassNames(classnames);
+            qiaoConfig.setAgentsConfig(agentsConfig);
+            Map<String, String> classnames = getClassNames(agentsConfig);
+            qiaoConfig.setAgentClassNames(classnames);
+            qiaoConfig.setAgentsConfig(agentsConfig);
+            Map<String, QiaoConfig.Agent> agents = new HashMap<>();
+            for (int i = 0; i < agentsConfig.size(); i++) {
+                QiaoConfig.Agent agent = qiaoConfig.new Agent();
 
-            Map<String, FunnelComponents> mcomponents = new HashMap<String, FunnelComponents>();
-            for (int i = 0; i < tmp.size(); i++)
-            {
-                FunnelComponents fc = qiaoConfig.new FunnelComponents();
+                String funnels = String.format(ConfigConstants.CFGKEY_FUNNEL, i);
+                MultiSubnodeConfiguration tmpFunnels = loadMutiNodeConfigAndProperties(funnels);
 
-                fc.setSourceConfig(loadSourceConfig(i));
-                fc.setSinkConfig(loadSinkConfig(i));
-                fc.setId(tmp.get(i).getId());
-                mcomponents.put(fc.getId(), fc);
+                if (tmpFunnels == null) {
+                    logger.warn(ConfigConstants.CFGKEY_FUNNEL + " not configured");
+                } else {
+                    agent.setFunnelConfig(tmpFunnels);
+
+                    Map<String, String> classnamesFunnels = getClassNames(tmpFunnels);
+                    agent.setFunnelClassNames(classnamesFunnels);
+                    Map<String, QiaoConfig.Agent.FunnelComponents> mcomponents = new HashMap<>();
+
+                    for (int j = 0; j < tmpFunnels.size(); j++) {
+                        QiaoConfig.Agent.FunnelComponents fc = agent.new FunnelComponents();
+                        fc.setSourceConfig(loadSourceConfig(i, j));
+                        fc.setSinkConfig(loadSinkConfig(i, j));
+                        fc.setId(tmpFunnels.get(j).getId());
+                        mcomponents.put(fc.getId(), fc);
+                    }
+
+                    agent.setFunnelComponents(mcomponents);
+                }
+
+
+                Map<String, PropertyValue> prop_map = getPropertyMap(String.format(
+                    ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, ConfigConstants.CFGKEY_AGENT, i));
+
+                String agentLabel = (String) prop_map
+                    .get("fileManager").getValue();
+
+
+                if (agentLabel == null) {
+                    logger.warn(ConfigConstants.CFGKEY_AGENT + " filemanager not configured");
+                } else {
+                    agent.setFileManagerConfig(agentLabel);
+                }
+
+                agents.put(agentsConfig.get(i).getId(), agent);
             }
-
-            qiaoConfig.setFunnelComponents(mcomponents);
+            qiaoConfig.setAgentsComponents(agents);
         }
     }
 
 
-    protected InjectorConfig loadSourceConfig(int idx)
+    protected InjectorConfig loadSourceConfig(int idx, final int idxFunnel)
     {
         String node_idx = String.format(ConfigConstants.CFGKEY_FUNNEL_INJECTOR,
-                idx);
+                idx, idxFunnel);
         InjectorConfig source_cfg = new InjectorConfig();
         SingleSubnodeConfiguration tmp = loadSingleNodeConfigAndProperties(node_idx);
         if (tmp == null)
@@ -125,10 +156,10 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     }
 
 
-    protected EmitterConfig loadSinkConfig(int idx)
+    protected EmitterConfig loadSinkConfig(int idx, final int idxFunnel)
     {
         String node_idx = String.format(ConfigConstants.CFGKEY_FUNNEL_EMITTER,
-                idx);
+                idx, idxFunnel);
 
         EmitterConfig sink_cfg = new EmitterConfig();
         sink_cfg.setEmitterContainerClassName(ConfigConstants.DEFAULT_FUNNEL_EMITTERCONTAINER_CLASSNAME);

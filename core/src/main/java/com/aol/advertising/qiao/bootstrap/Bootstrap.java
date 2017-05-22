@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,6 @@ import com.aol.advertising.qiao.config.EmitterConfig;
 import com.aol.advertising.qiao.config.InjectorConfig;
 import com.aol.advertising.qiao.config.MultiSubnodeConfiguration;
 import com.aol.advertising.qiao.config.QiaoConfig;
-import com.aol.advertising.qiao.config.QiaoConfig.FunnelComponents;
 import com.aol.advertising.qiao.config.SingleSubnodeConfiguration;
 import com.aol.advertising.qiao.emitter.IDataEmitter;
 import com.aol.advertising.qiao.emitter.IDataEmitterContainer;
@@ -77,7 +77,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
     // -----------------------------------------
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private IAgent agent;
+    private List<IAgent> agents;
     private AgentXmlConfiguration agentConfig;
 
     private Map<String, Object> mbeanMap = new HashMap<String, Object>();
@@ -170,11 +170,12 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         statsCollector = getStatsCollector();
         statsCalculator = getStatsCalculator();
 
-        agent = composeAgent();
-        agent.init();
-
+        agents = createAgents();
+        for (IAgent agent: agents)
+        {
+            agent.init();
+        }
     }
-
 
     private void _validate()
     {
@@ -183,20 +184,28 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     }
 
 
-    private IAgent composeAgent() throws ClassNotFoundException
-    {
-        IAgent agent = appCtx.getBean(QiaoAgent.class);
-
+    private List<IAgent> createAgents() throws ClassNotFoundException {
+        List<IAgent> agentList = new ArrayList<>();
         resolveCacheDirectories();
+        QiaoConfig cfgC = agentConfig.getQiaoConfig();
 
-        agent.setFunnels(createFunnels());
-        mbeanMap.put(mbeanDomain + ":type=QiaoAgent", agent);
+        for (Map.Entry<String, QiaoConfig.Agent> agentConfig : cfgC.getAgentsComponents().entrySet()) {
 
-        if (bookKeeper != null)
-            agent.setBookKeeper(bookKeeper);
+            IAgent agent = new QiaoAgent();
+            QiaoConfig.Agent cfg = agentConfig.getValue();
+            List<IFunnel> funnelList = createFunnels(agentConfig.getKey());
+            agent.setFunnels(funnelList);
+            QiaoFileManager qiaoFileManager = (QiaoFileManager) ContextUtils.loadClassById(cfg.getFileManagerConfig());
+            agent.setFileManager(qiaoFileManager);
 
+            mbeanMap.put(mbeanDomain + ":type=QiaoAgent", agent);
+            if (bookKeeper != null)
+                agent.setBookKeeper(bookKeeper);
+
+            agentList.add(agent);
+        }
         loadMBeanExporter();
-        return agent;
+        return agentList;
     }
 
 
@@ -218,16 +227,19 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     }
 
 
-    private List<IFunnel> createFunnels() throws ClassNotFoundException
+    private List<IFunnel> createFunnels(final String idAgent) throws ClassNotFoundException
     {
         List<IFunnel> flist = new ArrayList<IFunnel>();
 
         QiaoConfig cfg = agentConfig.getQiaoConfig();
-        Map<String, String> id_map = cfg.getFunnelClassNames();
+        Map<String, QiaoConfig.Agent> msubCfgAgent = cfg.getAgentsComponents();
+        QiaoConfig.Agent cfgAgent = msubCfgAgent.get(idAgent);
 
-        Map<String, FunnelComponents> components = cfg.getFunnelComponents();
+        Map<String, String> id_map = cfgAgent.getFunnelClassNames();
 
-        MultiSubnodeConfiguration msub_cfg = cfg.getFunnelConfig();
+        Map<String, QiaoConfig.Agent.FunnelComponents> components = cfgAgent.getFunnelComponents();
+
+        MultiSubnodeConfiguration msub_cfg = cfgAgent.getFunnelConfig();
         for (SingleSubnodeConfiguration sub : msub_cfg)
         {
             String funnel_id = sub.getId();
@@ -241,7 +253,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
             String oname_pfx = mbeanDomain + ":type=Funnel-" + funnel.getId();
 
-            FunnelComponents fc = components.get(funnel_id);
+            QiaoConfig.Agent.FunnelComponents fc = components.get(funnel_id);
             IDataInjector source = this
                     .createDataInjector(fc.getSourceConfig());
             source.setFunnelId(funnel_id);
@@ -424,17 +436,21 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     @Override
     public void start() throws Exception
     {
-        logger.info("Starting agent...");
-        agent.start();
+        logger.info("Starting agents...");
+        for (IAgent agent : agents)
+        {
+            agent.start();
+        }
     }
 
 
     @Override
     public void stop()
     {
-        if (agent != null)
-        {
-            agent.shutdown();
+        if (agents != null) {
+            for (IAgent agent : agents) {
+                agent.shutdown();
+            }
         }
     }
 

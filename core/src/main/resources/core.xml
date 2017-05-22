@@ -22,10 +22,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <property name="mbeanExporter" ref="dynamicMBeanExporter" />
    </bean>
 
-   <bean id="agent" class="com.aol.advertising.qiao.agent.QiaoAgent">
-      <property name="statsManager" ref="statsManager" />
-   </bean>
-
    <bean id="funnel" class="com.aol.advertising.qiao.agent.DataFunnel" scope="prototype">
       <property name="dataPipeClassname" value="${funnel.data.pipe.classname:com.aol.advertising.qiao.agent.DataPipe}" />
       <property name="dataPipeCapacity" value="${funnel.data.pipe.capacity:4}" />

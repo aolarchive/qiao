@@ -21,9 +21,10 @@ public interface ConfigConstants
 {
     public static final String PROP_QIAO_CFG_DIR = "qiao.config.dir";
 
-    public static final String CFGKEY_FUNNEL = "funnel";
-    public static final String CFGKEY_FUNNEL_INJECTOR = "funnel(%d).injector";
-    public static final String CFGKEY_FUNNEL_EMITTER = "funnel(%d).emitter";
+    String CFGKEY_AGENT = "agent";
+    String CFGKEY_FUNNEL = "agent(%d).funnel";
+    String CFGKEY_FUNNEL_INJECTOR = "agent(%d).funnel(%d).injector";
+    String CFGKEY_FUNNEL_EMITTER = "agent(%d).funnel(%d).emitter";
 
     public static final String CFGKEY_PROPERTY_TEMPLATE = "%s(%d).property";
     public static final String CFGATTR_CLASSNAME = "class";

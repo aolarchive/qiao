@@ -19,9 +19,9 @@ package com.aol.advertising.qiao.agent;
 
 import java.util.List;
 
+import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import com.aol.advertising.qiao.management.ISuspendable;
 import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
-import com.aol.advertising.qiao.util.cache.PositionCache;
 
 public interface IAgent extends ISuspendable
 {
@@ -40,6 +40,7 @@ public interface IAgent extends ISuspendable
     public void setBookKeeper(QiaoFileBookKeeper bookKeeper);
 
 
+    void setFileManager(QiaoFileManager fileManager);
     //public void setPositionCache(PositionCache positionCache);
 
 }
