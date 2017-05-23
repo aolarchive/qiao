@@ -127,6 +127,17 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
                     agent.setFileManagerConfig(agentLabel);
                 }
 
+                String fileBookKeeper = prop_map
+                    .get("fileBookKeeper").getValue();
+
+
+                if (fileBookKeeper == null) {
+                    logger.warn(ConfigConstants.CFGKEY_AGENT + " fileBookKeeper not configured");
+                } else {
+                    agent.setFileBookKeeperConfig(fileBookKeeper);
+                }
+
+
                 agents.put(agentsConfig.get(i).getId(), agent);
             }
             qiaoConfig.setAgentsComponents(agents);

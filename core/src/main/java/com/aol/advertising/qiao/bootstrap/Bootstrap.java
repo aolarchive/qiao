@@ -91,7 +91,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     private String cacheDir;
     private String historyCacheName = "historyCache";
     private String historyCacheDir;
-    private QiaoFileBookKeeper bookKeeper;
+    // private QiaoFileBookKeeper bookKeeper;
 
     private List<InjectorCachePair> injectorList = new ArrayList<InjectorCachePair>();
 
@@ -173,7 +173,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         agents = createAgents();
         for (IAgent agent: agents)
         {
-            agent.init();
+            agent.init(historyCacheDir,historyCacheName);
         }
     }
 
@@ -197,13 +197,15 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
             agent.setFunnels(funnelList);
             QiaoFileManager qiaoFileManager = (QiaoFileManager) ContextUtils.loadClassById(cfg.getFileManagerConfig());
             agent.setFileManager(qiaoFileManager);
+            QiaoFileBookKeeper qiaoFileBookKeeper = (QiaoFileBookKeeper) ContextUtils.loadClassById(cfg.getFileBookKeeperConfig());
 
-            mbeanMap.put(mbeanDomain + ":type=QiaoAgent", agent);
-            if (bookKeeper != null)
-                agent.setBookKeeper(bookKeeper);
+            if (qiaoFileBookKeeper != null)
+                agent.setBookKeeper(qiaoFileBookKeeper);
 
             agentList.add(agent);
+            mbeanMap.put(mbeanDomain + ":type=QiaoAgent", agent);
         }
+
         loadMBeanExporter();
         return agentList;
     }
@@ -566,14 +568,14 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         {
             logger.info("Inject bookKeeper to " + bean.getClass());
             IInjectBookKeeper src = (IInjectBookKeeper) bean;
-            if (bookKeeper == null)
-            {
-                // only instantiate once
-                bookKeeper = ContextUtils.getBean(QiaoFileBookKeeper.class);
-                bookKeeper.setHistoryCacheDir(historyCacheDir);
-                bookKeeper.setHistoryCacheName(historyCacheName);
-            }
-            src.setBookKeeper(bookKeeper);
+//            if (bookKeeper == null)
+//            {
+//                // only instantiate once
+//                bookKeeper = ContextUtils.getBean(QiaoFileBookKeeper.class);
+//                bookKeeper.setHistoryCacheDir(historyCacheDir);
+//                bookKeeper.setHistoryCacheName(historyCacheName);
+//            }
+//            src.setBookKeeper(bookKeeper);
         }
 
         return bean;

@@ -24,4 +24,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <property name="quarantineFileHandler" ref="quarantineFileHandler" />
       <property name="candidateFilesPatternForRename" value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
    </bean>
+
+   <bean id="doneFileHandler-2" class="com.aol.advertising.qiao.injector.file.DoneFileHandler">
+      <property name="targetDir" value="${doneFileListener.donefile.move-targetDir:#{null}}" />
+      <property name="targetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy:#{null}}" />
+   </bean>
+
+   <bean id="fileBookKeeper-2" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper">
+      <property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath:#{null}}" />
+      <property name="cacheDefaultExpirySecs" value="${file.bookkeeper.cache.defaultExpirySecs:604800}" />
+      <property name="cacheDiskReapingIntervalSecs" value="${file.bookkeeper.cache.diskReapingIntervalSecs:60}" />
+      <property name="cacheDiskReapingInitDelaySecs" value="${file.bookkeeper.cache.diskReapingInitDelaySecs:60}" />
+   </bean>
+
 </beans>

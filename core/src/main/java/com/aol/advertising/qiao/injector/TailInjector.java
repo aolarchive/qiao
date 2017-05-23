@@ -703,7 +703,7 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
 
 
     @Override
-    public void setBookKeeper(QiaoFileBookKeeper bookKeeper)
+    public void setFileBookKeeper(QiaoFileBookKeeper bookKeeper)
     {
         this.bookKeeper = bookKeeper;
     }

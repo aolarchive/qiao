@@ -11,6 +11,7 @@
                 <property name="bufSize" value="${tailinjector.readBufferSize}" type="int" />
                 <property name="checksumByteLength" value="${tailinjector.checksumByteLength}" type="int" />
                 <property name="cacheDefaultExpirySecs" value="${tailInjector.positionCache.defaultExpirySecs}" type="int" />
+                <property name="fileBookKeeper" ref="fileBookKeeper" />
             </injector>
 
             <emitter id="kafkaEmitter" class="com.aol.advertising.qiao.emitter.KafkaEmitter">
@@ -35,6 +36,8 @@
                 <property name="dataHandler" ref="binDataHandler" />
                 <property name="srcDir" value="${fileinjector.srcDir}" />
                 <property name="filePattern" value="${fileinjector.filePattern}" />
+                <property name="doneFileHandler" ref="doneFileHandler" />
+                <property name="fileBookKeeper" ref="fileBookKeeper" />
             </injector>
 
 
@@ -50,6 +53,7 @@
 
         </funnel>
         <property name="fileManager" ref="qiaoFileManager" />
+        <property name="fileBookKeeper" ref="fileBookKeeper" />
     </agent>
 
 
@@ -63,6 +67,7 @@
                 <property name="bufSize" value="${tailinjector.readBufferSize}" type="int" />
                 <property name="checksumByteLength" value="${tailinjector.checksumByteLength}" type="int" />
                 <property name="cacheDefaultExpirySecs" value="${tailInjector.positionCache.defaultExpirySecs}" type="int" />
+                <property name="fileBookKeeper" ref="fileBookKeeper-2" />
             </injector>
 
             <emitter id="kafkaEmitter" class="com.aol.advertising.qiao.emitter.KafkaEmitter">
@@ -87,6 +92,8 @@
                 <property name="dataHandler" ref="binDataHandler" />
                 <property name="srcDir" value="${fileinjector.srcDir}" />
                 <property name="filePattern" value="${fileinjector.filePattern}" />
+                <property name="doneFileHandler" ref="doneFileHandler-2" />
+                <property name="fileBookKeeper" ref="fileBookKeeper-2" />
             </injector>
 
 
@@ -102,6 +109,7 @@
 
         </funnel>
         <property name="fileManager" ref="fileManager-2" />
+        <property name="fileBookKeeper" ref="fileBookKeeper-2" />
     </agent>
 
 </qiao-config>

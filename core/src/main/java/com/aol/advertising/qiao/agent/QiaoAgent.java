@@ -54,7 +54,7 @@ public class QiaoAgent implements IAgent
 
 
     @Override
-    public void init() throws Exception
+    public void init(final String historyCacheDir, final String historyCacheName) throws Exception
     {
         statsManager = ContextUtils.getBean(StatsManager.class);
 
@@ -62,6 +62,8 @@ public class QiaoAgent implements IAgent
 
         if (bookKeeper != null)
         {
+            bookKeeper.setHistoryCacheDir(historyCacheDir);
+            bookKeeper.setHistoryCacheName(historyCacheName);
             bookKeeper.init();
 
             fileManager.setBookKeeper(bookKeeper);

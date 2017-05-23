@@ -56,6 +56,7 @@ public class QiaoConfig
         protected Map<String, String> funnelClassNames; // <id, class>
         protected Map<String, FunnelComponents> funnelComponents;
         private String fileManagerConfig;
+        private String fileBookKeeperConfig;
 
 
         public MultiSubnodeConfiguration getFunnelConfig()
@@ -69,6 +70,14 @@ public class QiaoConfig
 
         public String getFileManagerConfig() {
             return fileManagerConfig;
+        }
+
+        public String getFileBookKeeperConfig() {
+            return fileBookKeeperConfig;
+        }
+
+        public void setFileBookKeeperConfig(final String fileBookKeeperConfig) {
+            this.fileBookKeeperConfig = fileBookKeeperConfig;
         }
 
         public void setFunnelConfig(MultiSubnodeConfiguration funnelConfig)

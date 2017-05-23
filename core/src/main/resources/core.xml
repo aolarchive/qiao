@@ -43,7 +43,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    </bean>
 
    <bean class="com.aol.advertising.qiao.injector.TailInjector" scope="prototype">
-      <property name="bookKeeper" ref="fileBookKeeper" />
+      <property name="fileBookKeeper" ref="fileBookKeeper" />
       <property name="fileLockManager" ref="fileLockManager" />
       <property name="delayMillis" value="${injector.tail.pullIntervalMillis:10}" />
       <property name="bufSize" value="${injector.tail.buffersize:4096}" />
@@ -57,7 +57,7 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    </bean>
 
    <bean class="com.aol.advertising.qiao.injector.PatternMatchFileInjector" scope="prototype">
-      <property name="bookKeeper" ref="fileBookKeeper" />
+      <property name="fileBookKeeper" ref="fileBookKeeper" />
       <property name="fileLockManager" ref="fileLockManager" />
       <property name="fileCheckDelayMillis" value="${injector.fileinjector.pullIntervalMillis:10}" />
       <property name="bufSize" value="${injector.fileinjector.buffersize:4096}" />
