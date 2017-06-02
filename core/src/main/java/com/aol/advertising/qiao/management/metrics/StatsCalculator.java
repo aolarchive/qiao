@@ -51,7 +51,7 @@ public class StatsCalculator implements Runnable,
     private long intervalSecs = 60;
     private long initDelaySecs = 15;
     private String fmtDuration = "Time %1$tMm:%1$tSs|  ";
-    private String fmtId = "[%1$.10s] ";
+    private String fmtId = "[%1$.12s] ";
     private boolean writeToLog = false;
     private boolean running = false;
     private ScheduledExecutorService scheduler;
