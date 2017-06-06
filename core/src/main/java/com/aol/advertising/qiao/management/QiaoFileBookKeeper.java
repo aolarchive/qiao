@@ -46,7 +46,7 @@ public class QiaoFileBookKeeper implements IFileOperationListener
     private BufferedWriter writer;
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
     private BookKeepingCache historyCache;
-    private String historyCacheName;
+    private String historyCacheName = "historyCache";
     private String historyCacheDir;
     private int cacheDefaultExpirySecs = 86400;
     private int cacheDiskReapingIntervalSecs = 60;

@@ -17,49 +17,103 @@
 
 package com.aol.advertising.qiao.config;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class QiaoConfig
 {
-    protected MultiSubnodeConfiguration funnelConfig;
-    protected Map<String, String> funnelClassNames; // <id, class>
-    protected Map<String, FunnelComponents> funnelComponents;
+    protected MultiSubnodeConfiguration agentNodeConfig;
+    protected Map<String, AgentConfig> agentConfigMap;
 
 
-    public MultiSubnodeConfiguration getFunnelConfig()
+    public MultiSubnodeConfiguration getAgentNodeConfig()
     {
-        return funnelConfig;
+        return agentNodeConfig;
     }
 
 
-    public void setFunnelConfig(MultiSubnodeConfiguration funnelConfig)
+    public void setAgentNodeConfig(MultiSubnodeConfiguration agentNodeConfig)
     {
-        this.funnelConfig = funnelConfig;
+        this.agentNodeConfig = agentNodeConfig;
     }
 
 
-    public Map<String, String> getFunnelClassNames()
+    public AgentConfig getAgentConfig(String id)
     {
-        return funnelClassNames;
+        return agentConfigMap.get(id);
     }
 
 
-    public void setFunnelClassNames(Map<String, String> funnelClassNames)
+    public Map<String, AgentConfig> getAgentConfigMap()
     {
-        this.funnelClassNames = funnelClassNames;
+        return agentConfigMap;
     }
 
 
-    public Map<String, FunnelComponents> getFunnelComponents()
+    public void setAgentConfigMap(Map<String, AgentConfig> agentConfigMap)
     {
-        return funnelComponents;
+        this.agentConfigMap = agentConfigMap;
     }
 
 
-    public void setFunnelComponents(
-            Map<String, FunnelComponents> funnelComponents)
+    public void addAgentConfig(String agentId, AgentConfig agentConfig)
     {
-        this.funnelComponents = funnelComponents;
+        if (null == agentConfigMap)
+            agentConfigMap = new HashMap<>();
+
+        this.agentConfigMap.put(agentId, agentConfig);
+    }
+
+
+    public int getAgentCount()
+    {
+        return agentConfigMap.size();
+    }
+
+    // -----------------------------
+    public class AgentConfig
+    {
+        protected MultiSubnodeConfiguration funnelConfig;
+        protected Map<String, String> funnelClassNames; // <id, class>
+        protected Map<String, FunnelComponents> funnelComponents;
+
+
+        public MultiSubnodeConfiguration getFunnelConfig()
+        {
+            return funnelConfig;
+        }
+
+
+        public void setFunnelConfig(MultiSubnodeConfiguration funnelConfig)
+        {
+            this.funnelConfig = funnelConfig;
+        }
+
+
+        public Map<String, String> getFunnelClassNames()
+        {
+            return funnelClassNames;
+        }
+
+
+        public void setFunnelClassNames(Map<String, String> funnelClassNames)
+        {
+            this.funnelClassNames = funnelClassNames;
+        }
+
+
+        public Map<String, FunnelComponents> getFunnelComponents()
+        {
+            return funnelComponents;
+        }
+
+
+        public void setFunnelComponents(
+                Map<String, FunnelComponents> funnelComponents)
+        {
+            this.funnelComponents = funnelComponents;
+        }
+
     }
 
     public class FunnelComponents

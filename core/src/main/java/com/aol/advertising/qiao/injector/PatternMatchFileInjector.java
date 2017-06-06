@@ -58,6 +58,7 @@ import com.aol.advertising.qiao.injector.file.IFileOperationListener;
 import com.aol.advertising.qiao.injector.file.IFileReader.READ_MODE;
 import com.aol.advertising.qiao.injector.file.ITailerDataHandler;
 import com.aol.advertising.qiao.injector.file.TextBlockFileReader;
+import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import com.aol.advertising.qiao.management.FileLockManager;
 import com.aol.advertising.qiao.management.FileReadingPositionCache;
 import com.aol.advertising.qiao.management.IStatsCalculatorAware;
@@ -65,6 +66,7 @@ import com.aol.advertising.qiao.management.ISuspendable;
 import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
 import com.aol.advertising.qiao.management.QiaoFileEntry;
 import com.aol.advertising.qiao.management.QuarantineFileHandler;
+import com.aol.advertising.qiao.management.ToolsStore;
 import com.aol.advertising.qiao.management.metrics.IStatisticsStore;
 import com.aol.advertising.qiao.management.metrics.PubStats;
 import com.aol.advertising.qiao.management.metrics.PubStats.StatType;
@@ -74,7 +76,6 @@ import com.aol.advertising.qiao.management.metrics.StatsEnum;
 import com.aol.advertising.qiao.management.metrics.StatsEvent;
 import com.aol.advertising.qiao.management.metrics.StatsEvent.StatsOp;
 import com.aol.advertising.qiao.util.CommonUtils;
-import com.aol.advertising.qiao.util.ContextUtils;
 import com.aol.advertising.qiao.util.FileFinder;
 import com.aol.advertising.qiao.util.IntervalMetric;
 import com.aol.advertising.qiao.util.StatsUtils;
@@ -113,9 +114,8 @@ import com.aol.advertising.qiao.util.cache.PositionCache;
  *            data buffer format: String or ByteBuffer
  */
 @ManagedResource
-public class PatternMatchFileInjector<T> implements IDataInjector,
-        IInjectBookKeeper, IInjectPositionCacheDependency, ISuspendable,
-        IStatsCalculatorAware
+public class PatternMatchFileInjector<T> implements IDataInjector, //IInjectBookKeeper,
+        IInjectPositionCacheDependency, ISuspendable, IStatsCalculatorAware
 {
     public enum FileReadStatus
     {
@@ -161,6 +161,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     private ICallback callback; // internal use for adding data to pipe
     private String id;
     private String funnelId;
+    private String agentId;
 
     private String statKeyInputs = StatsEnum.PROCESSED_BLOCKS.value();
     private String statKeyFiles = StatsEnum.PROCESSED_FILES.value();
@@ -198,8 +199,6 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
         _setupCallback();
 
-        _setupDoneFileHandler();
-
         _registerStatsCollector();
 
         _registerStatsCalculator();
@@ -223,14 +222,28 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         if (dataPipe == null)
             throw new ConfigurationException("dataPipe not set");
 
-        if (bookKeeper == null)
-            throw new ConfigurationException("bookKeeper not set");
-
         if (positionCache == null)
             throw new ConfigurationException("positionCache not set");
 
-        if (quarantineFileHandler == null)
-            throw new ConfigurationException("quarantineFileHandler not set");
+        QiaoFileManager fm = ToolsStore.getFileManager(agentId);
+        if (null == fm)
+            throw new ConfigurationException(
+                    "Missing file manager for agent " + agentId);
+
+        doneFileHandler = fm.getDoneFileHandler();
+        if (null == doneFileHandler)
+            throw new ConfigurationException(
+                    "Missing doneFileHandler for agent " + agentId);
+
+        quarantineFileHandler = fm.getQuarantineFileHandler();
+        if (null == quarantineFileHandler)
+            throw new ConfigurationException(
+                    "Missing quarantineFileHandler for agent " + agentId);
+
+        bookKeeper = fm.getBookKeeper();
+        if (bookKeeper == null)
+            throw new ConfigurationException(
+                    "Missing bookKeeper for agent " + agentId);
 
     }
 
@@ -295,25 +308,13 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
         FileReadingPositionCache.FileReadState fstate = fileReadPosition
                 .getReadState();
-        String s = String
-                .format("LAST PROCESSING STATUS: file=%s, timestamp=%s, read_position=%d, checksum=%d",
-                        filename,
-                        CommonUtils.getFriendlyTimeString(fstate.timestamp),
-                        fstate.position, fstate.checksum);
+        String s = String.format(
+                "LAST PROCESSING STATUS: file=%s, timestamp=%s, read_position=%d, checksum=%d",
+                filename, CommonUtils.getFriendlyTimeString(fstate.timestamp),
+                fstate.position, fstate.checksum);
         logger.info(s);
 
         return fileReadPosition;
-    }
-
-
-    private void _setupDoneFileHandler()
-    {
-        doneFileHandler = ContextUtils.getBean(DoneFileHandler.class); // a
-                                                                       // singleton
-                                                                       // - init
-                                                                       // by
-                                                                       // file
-                                                                       // manager
     }
 
 
@@ -333,15 +334,15 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             case BINARY:
                 file_reader = BinaryFileReader.create(bufSize,
 
-                (ITailerDataHandler<ByteBuffer>) dataHandler);
+                        (ITailerDataHandler<ByteBuffer>) dataHandler);
                 break;
             case AVRO:
                 file_reader = AvroFileReader.create(bufSize,
                         (ITailerDataHandler<ByteBuffer>) dataHandler);
                 break;
             default:
-                throw new ConfigurationException("invalid tailer mode: "
-                        + readMode);
+                throw new ConfigurationException(
+                        "invalid tailer mode: " + readMode);
         }
 
         file_reader.setNumInputs(numInputs);
@@ -406,26 +407,26 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         {
             IStatisticsStore statsStore = StatsUtils.getStatsStore(funnelId);
             if (statsStore == null)
-                throw new ConfigurationException(funnelId
-                        + " statistics store does not exist");
+                throw new ConfigurationException(
+                        funnelId + " statistics store does not exist");
 
             if (counterKeys.size() == 0)
             {
-                PubStats pstats = new PubStats(statKeyFiles, true, false,
-                        false, false); // raw
+                PubStats pstats = new PubStats(statKeyFiles, true, false, false,
+                        false); // raw
                 counterKeys.put(pstats.getMetric(), pstats);
 
                 pstats = new PubStats(statKeyInputs, false, false, true, false); // diff
                 counterKeys.put(pstats.getMetric(), pstats);
 
-                pstats = new PubStats(StatType.INTERVAL_METRIC,
-                        statKeyFileTime, false, true, false, false); // avg
+                pstats = new PubStats(StatType.INTERVAL_METRIC, statKeyFileTime,
+                        false, true, false, false); // avg
                 counterKeys.put(pstats.getMetric(), pstats);
 
             }
 
-            statsCalculator.register(statsCalculator.new CalcCallable(
-                    statsStore, counterKeys));
+            statsCalculator.register(
+                    statsCalculator.new CalcCallable(statsStore, counterKeys));
         }
 
     }
@@ -654,8 +655,8 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     }
 
 
-    private void tryAcquireLock(long checksum) throws IOException,
-            InterruptedException
+    private void tryAcquireLock(long checksum)
+            throws IOException, InterruptedException
     {
         if (logger.isDebugEnabled())
             logger.debug("try acquiring access lock for file with checksum="
@@ -789,7 +790,8 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             catch (Exception e)
             {
                 logger.error(
-                        "failed to resume the opration => " + e.getMessage(), e);
+                        "failed to resume the opration => " + e.getMessage(),
+                        e);
             }
         }
         else
@@ -946,12 +948,6 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     }
 
 
-    public void setFileService(QiaoFileBookKeeper fileService)
-    {
-        this.bookKeeper = fileService;
-    }
-
-
     public void setChecksumByteLength(int checksumByteLength)
     {
         this.checksumByteLength = checksumByteLength;
@@ -972,13 +968,6 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     public void setReadMode(String readrMode)
     {
         this.readMode = READ_MODE.valueOf(readrMode);
-    }
-
-
-    @Override
-    public void setBookKeeper(QiaoFileBookKeeper bookKeeper)
-    {
-        this.bookKeeper = bookKeeper;
     }
 
 
@@ -1207,7 +1196,8 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     }
 
 
-    public void setCacheDiskReapingIntervalSecs(int cacheDiskReapingIntervalSecs)
+    public void setCacheDiskReapingIntervalSecs(
+            int cacheDiskReapingIntervalSecs)
     {
         this.cacheDiskReapingIntervalSecs = cacheDiskReapingIntervalSecs;
     }
@@ -1226,9 +1216,9 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     }
 
 
-    public void setQuarantineFileHandler(
-            QuarantineFileHandler quarantineFileHandler)
+    @Override
+    public void setAgentId(String agentId)
     {
-        this.quarantineFileHandler = quarantineFileHandler;
+        this.agentId = agentId;
     }
 }

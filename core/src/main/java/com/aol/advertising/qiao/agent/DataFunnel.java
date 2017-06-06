@@ -74,6 +74,7 @@ public class DataFunnel implements IFunnel, Runnable
     private int intervalSecs = 5;
     private ScheduledFuture< ? > schedFuture;
 
+    private String agentId;
 
     @Override
     public void init() throws Exception
@@ -85,6 +86,8 @@ public class DataFunnel implements IFunnel, Runnable
             statsStore.init();
         }
 
+        injector.setAgentId(agentId);
+        
         dataPipe = createDataPipe();
         injector.setDataPipe(dataPipe);
         emitterContainer.setDataPipe(dataPipe);
@@ -503,5 +506,11 @@ public class DataFunnel implements IFunnel, Runnable
     public int getIntervalSecs()
     {
         return intervalSecs;
+    }
+
+
+    public void setAgentId(String agentId)
+    {
+        this.agentId = agentId;
     }
 }

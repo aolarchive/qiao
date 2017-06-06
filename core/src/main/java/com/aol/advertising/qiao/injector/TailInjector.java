@@ -45,10 +45,12 @@ import com.aol.advertising.qiao.injector.file.ITailer.TAIL_MODE;
 import com.aol.advertising.qiao.injector.file.ITailerDataHandler;
 import com.aol.advertising.qiao.injector.file.TextBlockFileTailer;
 import com.aol.advertising.qiao.injector.file.TextFileTailer;
+import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import com.aol.advertising.qiao.management.FileLockManager;
 import com.aol.advertising.qiao.management.FileReadingPositionCache;
 import com.aol.advertising.qiao.management.IStatsCalculatorAware;
 import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
+import com.aol.advertising.qiao.management.ToolsStore;
 import com.aol.advertising.qiao.management.metrics.IStatisticsStore;
 import com.aol.advertising.qiao.management.metrics.PubStats;
 import com.aol.advertising.qiao.management.metrics.PubStats.StatType;
@@ -93,8 +95,8 @@ import com.aol.advertising.qiao.util.cache.PositionCache;
  *            data buffer format: String or ByteBuffer
  */
 @ManagedResource(description = "Tail Injector")
-public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
-        IInjectPositionCache, IStatsCalculatorAware
+public class TailInjector<T>
+        implements IDataInjector, IInjectPositionCache, IStatsCalculatorAware
 {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -129,6 +131,7 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
     private ICallback callback; // internal use for adding data to pipe
     private String id;
     private String funnelId;
+    private String agentId;
 
     private String statKeyInputs = StatsEnum.PROCESSED_BLOCKS.value();
     private String statKeyFiles = StatsEnum.PROCESSED_FILES.value();
@@ -177,20 +180,26 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
         if (filename == null)
             throw new ConfigurationException("filename not defined");
 
-        //if (filePattern == null)
-        //    throw new ConfigurationException("filePattern not defined");
-
         if (dataPipe == null)
             throw new ConfigurationException("dataPipe not set");
-
-        if (bookKeeper == null)
-            throw new ConfigurationException("bookKeeper not set");
 
         if (fileLockManager == null)
             throw new ConfigurationException("fileLockManager not set");
 
         if (positionCache == null)
             throw new ConfigurationException("positionCache not set");
+
+        //
+        QiaoFileManager fm = ToolsStore.getFileManager(agentId);
+        if (null == fm)
+            throw new ConfigurationException(
+                    "Missing file manager for agent " + agentId);
+
+        bookKeeper = fm.getBookKeeper();
+        if (bookKeeper == null)
+            throw new ConfigurationException(
+                    "Missing bookKeeper for agent " + agentId);
+
     }
 
 
@@ -253,8 +262,8 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
                         startReadingFromFileEnd);
                 break;
             case TEXT:
-                tailer = TextFileTailer.create(fileToTail, delayMillis,
-                        bufSize, fileReadPosition,
+                tailer = TextFileTailer.create(fileToTail, delayMillis, bufSize,
+                        fileReadPosition,
                         (ITailerDataHandler<String>) dataHandler,
                         startReadingFromFileEnd);
                 break;
@@ -264,13 +273,13 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
                         (ITailerDataHandler<ByteBuffer>) dataHandler);
                 break;
             case AVRO:
-                tailer = AvroFileTailer.create(fileToTail, delayMillis,
-                        bufSize, fileReadPosition,
+                tailer = AvroFileTailer.create(fileToTail, delayMillis, bufSize,
+                        fileReadPosition,
                         (ITailerDataHandler<ByteBuffer>) dataHandler);
                 break;
             default:
-                throw new ConfigurationException("invalid tailer mode: "
-                        + tailMode);
+                throw new ConfigurationException(
+                        "invalid tailer mode: " + tailMode);
         }
 
         tailer.setNumInputs(numInputs);
@@ -334,26 +343,26 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
         {
             IStatisticsStore statsStore = StatsUtils.getStatsStore(funnelId);
             if (statsStore == null)
-                throw new ConfigurationException(funnelId
-                        + " statistics store does not exist");
+                throw new ConfigurationException(
+                        funnelId + " statistics store does not exist");
 
             if (counterKeys.size() == 0)
             {
-                PubStats pstats = new PubStats(statKeyFiles, true, false,
-                        false, false); // raw
+                PubStats pstats = new PubStats(statKeyFiles, true, false, false,
+                        false); // raw
                 counterKeys.put(pstats.getMetric(), pstats);
 
                 pstats = new PubStats(statKeyInputs, false, false, true, false); // diff
                 counterKeys.put(pstats.getMetric(), pstats);
 
-                pstats = new PubStats(StatType.INTERVAL_METRIC,
-                        statKeyFileTime, false, true, false, false); // avg
+                pstats = new PubStats(StatType.INTERVAL_METRIC, statKeyFileTime,
+                        false, true, false, false); // avg
                 counterKeys.put(pstats.getMetric(), pstats);
 
             }
 
-            statsCalculator.register(statsCalculator.new CalcCallable(
-                    statsStore, counterKeys));
+            statsCalculator.register(
+                    statsCalculator.new CalcCallable(statsStore, counterKeys));
         }
 
     }
@@ -458,8 +467,8 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
             {
                 tailerThread = new Thread(tailer);
                 tailerThread.setDaemon(true);
-                tailerThread.setName(CommonUtils
-                        .resolveThreadName("TailInjector"));
+                tailerThread
+                        .setName(CommonUtils.resolveThreadName("TailInjector"));
                 tailerThread.start();
 
                 status = InjectorStatus.ACTIVE;
@@ -468,7 +477,8 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
             catch (Exception e)
             {
                 logger.error(
-                        "failed to resume the opration => " + e.getMessage(), e);
+                        "failed to resume the opration => " + e.getMessage(),
+                        e);
             }
 
         }
@@ -702,13 +712,6 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
     }
 
 
-    @Override
-    public void setBookKeeper(QiaoFileBookKeeper bookKeeper)
-    {
-        this.bookKeeper = bookKeeper;
-    }
-
-
     @ManagedAttribute
     public String getFunnelId()
     {
@@ -826,7 +829,8 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
     }
 
 
-    public void setCacheDiskReapingIntervalSecs(int cacheDiskReapingIntervalSecs)
+    public void setCacheDiskReapingIntervalSecs(
+            int cacheDiskReapingIntervalSecs)
     {
         this.cacheDiskReapingIntervalSecs = cacheDiskReapingIntervalSecs;
     }
@@ -842,5 +846,12 @@ public class TailInjector<T> implements IDataInjector, IInjectBookKeeper,
             int cacheDiskReapingInitDelaySecs)
     {
         this.cacheDiskReapingInitDelaySecs = cacheDiskReapingInitDelaySecs;
+    }
+
+
+    @Override
+    public void setAgentId(String agentId)
+    {
+        this.agentId = agentId;
     }
 }

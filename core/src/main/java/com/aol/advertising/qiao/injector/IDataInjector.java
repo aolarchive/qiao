@@ -58,4 +58,6 @@ public interface IDataInjector extends ISuspendable,
 
     public void setDataPipe(IDataPipe dataPipe);
 
+
+    public void setAgentId(String agentId);
 }

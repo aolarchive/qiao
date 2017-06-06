@@ -20,12 +20,12 @@ package com.aol.advertising.qiao.config;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class MultiSubnodeConfiguration extends
-        ArrayList<SingleSubnodeConfiguration>
+public class MultiSubnodeConfiguration
+        extends ArrayList<SingleSubnodeConfiguration>
 {
     private static final long serialVersionUID = -7541390650412911504L;
     private String id;
-    private Map<String, String> properties;
+    private Map<String, PropertyValue> properties;
 
 
     public String getId()
@@ -40,8 +40,20 @@ public class MultiSubnodeConfiguration extends
     }
 
 
-    public Map<String, String> getProperties(int index)
+    public Map<String, PropertyValue> getProperties(int index)
     {
         return properties;
+    }
+
+
+    public Map<String, PropertyValue> getProperties()
+    {
+        return properties;
+    }
+
+
+    public void setProperties(Map<String, PropertyValue> properties)
+    {
+        this.properties = properties;
     }
 }

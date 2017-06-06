@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2015 AOL Inc.
+ * Copyright (c) 2017 AOL Inc.
  * @author:     ytung05
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.aol.advertising.qiao.config.PropertyValue.DataType;
 import com.aol.advertising.qiao.config.PropertyValue.Type;
+import com.aol.advertising.qiao.config.QiaoConfig.AgentConfig;
 import com.aol.advertising.qiao.config.QiaoConfig.FunnelComponents;
 import com.aol.advertising.qiao.exception.ConfigurationException;
 import com.aol.advertising.qiao.util.CommonUtils;
@@ -41,7 +42,7 @@ import com.aol.advertising.qiao.util.XmlConfigUtil;
  * AgentXmlConfiguration parses application's qiao.xml and loads configuration
  * parameters for all the defined components.
  */
-public class AgentXmlConfiguration implements IAgentXmlConfig
+public class AgentXmlConfiguration
 {
 
     protected Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -53,7 +54,6 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     protected QiaoConfig qiaoConfig;
 
 
-    @Override
     public void load() throws ConfigurationException
     {
         boolean valid = XmlConfigUtil.validateXml(configXmlFileUri,
@@ -76,39 +76,65 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     {
         qiaoConfig = new QiaoConfig();
 
-        MultiSubnodeConfiguration tmp = loadMutiNodeConfigAndProperties(ConfigConstants.CFGKEY_FUNNEL);
+        MultiSubnodeConfiguration aCfg = loadMutiNodeConfigAndProperties(
+                ConfigConstants.CFGKEY_AGENT);
+        if (aCfg == null)
+        {
+            logger.warn(ConfigConstants.CFGKEY_AGENT + " not configured");
+            return;
+        }
+
+        qiaoConfig.setAgentNodeConfig(aCfg);
+
+        for (int i = 0; i < aCfg.size(); i++)
+        {
+            AgentConfig agentCfg = qiaoConfig.new AgentConfig();
+            qiaoConfig.addAgentConfig(aCfg.get(i).getId(), agentCfg);
+
+            loadFunnelConfig(agentCfg, i);
+        }
+
+    }
+
+
+    private void loadFunnelConfig(AgentConfig agentConfig, int agentIdx)
+    {
+
+        MultiSubnodeConfiguration tmp = loadMutiNodeConfigAndProperties(
+                String.format(ConfigConstants.CFGKEY_FUNNEL, agentIdx));
         if (tmp == null)
         {
             logger.warn(ConfigConstants.CFGKEY_FUNNEL + " not configured");
         }
         else
         {
-            qiaoConfig.setFunnelConfig(tmp);
+            agentConfig.setFunnelConfig(tmp);
             Map<String, String> classnames = getClassNames(tmp);
-            qiaoConfig.setFunnelClassNames(classnames);
+            agentConfig.setFunnelClassNames(classnames);
 
             Map<String, FunnelComponents> mcomponents = new HashMap<String, FunnelComponents>();
             for (int i = 0; i < tmp.size(); i++)
             {
                 FunnelComponents fc = qiaoConfig.new FunnelComponents();
 
-                fc.setSourceConfig(loadSourceConfig(i));
-                fc.setSinkConfig(loadSinkConfig(i));
+                fc.setSourceConfig(loadSourceConfig(agentIdx, i));
+                fc.setSinkConfig(loadSinkConfig(agentIdx, i));
                 fc.setId(tmp.get(i).getId());
                 mcomponents.put(fc.getId(), fc);
             }
 
-            qiaoConfig.setFunnelComponents(mcomponents);
+            agentConfig.setFunnelComponents(mcomponents);
         }
     }
 
 
-    protected InjectorConfig loadSourceConfig(int idx)
+    protected InjectorConfig loadSourceConfig(int agentIdx, int funnelIdx)
     {
         String node_idx = String.format(ConfigConstants.CFGKEY_FUNNEL_INJECTOR,
-                idx);
+                agentIdx, funnelIdx);
         InjectorConfig source_cfg = new InjectorConfig();
-        SingleSubnodeConfiguration tmp = loadSingleNodeConfigAndProperties(node_idx);
+        SingleSubnodeConfiguration tmp = loadSingleNodeConfigAndProperties(
+                node_idx);
         if (tmp == null)
         {
             logger.warn(node_idx + " not configured");
@@ -125,15 +151,17 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     }
 
 
-    protected EmitterConfig loadSinkConfig(int idx)
+    protected EmitterConfig loadSinkConfig(int AgentIdx, int funnelIdx)
     {
         String node_idx = String.format(ConfigConstants.CFGKEY_FUNNEL_EMITTER,
-                idx);
+                AgentIdx, funnelIdx);
 
         EmitterConfig sink_cfg = new EmitterConfig();
-        sink_cfg.setEmitterContainerClassName(ConfigConstants.DEFAULT_FUNNEL_EMITTERCONTAINER_CLASSNAME);
+        sink_cfg.setEmitterContainerClassName(
+                ConfigConstants.DEFAULT_FUNNEL_EMITTERCONTAINER_CLASSNAME);
 
-        MultiSubnodeConfiguration tmp = loadMutiNodeConfigAndProperties(node_idx);
+        MultiSubnodeConfiguration tmp = loadMutiNodeConfigAndProperties(
+                node_idx);
         if (tmp == null)
         {
             logger.warn(node_idx + " not configured");
@@ -242,7 +270,8 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
      * @param key
      * @return
      */
-    private MultiSubnodeConfiguration loadMutiNodeConfigAndProperties(String key)
+    private MultiSubnodeConfiguration loadMutiNodeConfigAndProperties(
+            String key)
     {
 
         logger.debug("------- looking up " + key + " -------");
@@ -261,8 +290,8 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
             single.putAll(member);
             single.setId((String) member.get(ConfigConstants.CFGATTR_ID));
 
-            Map<String, PropertyValue> prop_map = getPropertyMap(String.format(
-                    ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, i));
+            Map<String, PropertyValue> prop_map = getPropertyMap(String
+                    .format(ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, i));
 
             if (prop_map != null && prop_map.size() > 0)
             {
@@ -282,8 +311,8 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
 
         logger.debug("------- looking up " + key + " -------");
 
-        Map<String, Object> member = XmlConfigUtil.parseSingleNodeAttributes(
-                xmlConfig, key);
+        Map<String, Object> member = XmlConfigUtil
+                .parseSingleNodeAttributes(xmlConfig, key);
         if (member == null || member.size() == 0)
             return null;
 
@@ -291,8 +320,8 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
         single.putAll(member);
         single.setId((String) member.get(ConfigConstants.CFGATTR_ID));
 
-        Map<String, PropertyValue> prop_map = getPropertyMap(String.format(
-                ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, 0));
+        Map<String, PropertyValue> prop_map = getPropertyMap(String
+                .format(ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, 0));
 
         if (prop_map != null && prop_map.size() > 0)
         {
@@ -385,8 +414,8 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     {
 
         logger.debug("------- looking up " + key + " -------");
-        Map<String, Object> map = XmlConfigUtil.parseSingleNodeAttributes(
-                xmlConfig, key);
+        Map<String, Object> map = XmlConfigUtil
+                .parseSingleNodeAttributes(xmlConfig, key);
 
         if (logger.isDebugEnabled())
         {

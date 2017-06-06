@@ -35,6 +35,7 @@ public class DummyDataSource implements IDataInjector
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String id = this.getClass().getSimpleName();
     private String funnelId;
+    private String agentId;
 
     private volatile boolean running = false;
 
@@ -164,5 +165,13 @@ public class DummyDataSource implements IDataInjector
     public String getFunnelId()
     {
         return funnelId;
+    }
+
+
+    @Override
+    public void setAgentId(String agentId)
+    {
+        this.agentId = agentId;
+
     }
 }

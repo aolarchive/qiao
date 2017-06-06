@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2015 AOL Inc.
+ * Copyright (c) 2017 AOL Inc.
  * @author:     ytung05
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,9 @@ package com.aol.advertising.qiao.agent;
 
 import java.util.List;
 
+import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import com.aol.advertising.qiao.management.ISuspendable;
 import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
-import com.aol.advertising.qiao.util.cache.PositionCache;
 
 public interface IAgent extends ISuspendable
 {
@@ -40,6 +40,9 @@ public interface IAgent extends ISuspendable
     public void setBookKeeper(QiaoFileBookKeeper bookKeeper);
 
 
-    //public void setPositionCache(PositionCache positionCache);
+    public void setFileManager(QiaoFileManager fileManager);
+
+
+    public void setId(String id);
 
 }

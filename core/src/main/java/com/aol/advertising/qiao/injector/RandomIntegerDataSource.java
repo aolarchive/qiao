@@ -45,6 +45,7 @@ public class RandomIntegerDataSource implements IDataInjector
     private IDataPipe dataPipe;
     protected String funnelId;
     private String id = this.getClass().getSimpleName();
+    private String agentId;
 
     private volatile boolean running = false;
     private ThreadPoolTaskExecutor executor;
@@ -272,5 +273,12 @@ public class RandomIntegerDataSource implements IDataInjector
     public boolean isSuspended()
     {
         return isSuspended.get();
+    }
+
+
+    @Override
+    public void setAgentId(String agentId)
+    {
+        this.agentId = agentId;
     }
 }

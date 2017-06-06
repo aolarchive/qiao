@@ -17,6 +17,7 @@
 
 package com.aol.advertising.qiao.agent;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,7 +32,7 @@ import com.aol.advertising.qiao.injector.file.watcher.FileWatchService;
 import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
 import com.aol.advertising.qiao.management.QiaoFileEntry;
-import com.aol.advertising.qiao.management.metrics.StatsManager;
+import com.aol.advertising.qiao.management.ToolsStore;
 import com.aol.advertising.qiao.util.ContextUtils;
 
 /**
@@ -43,25 +44,28 @@ import com.aol.advertising.qiao.util.ContextUtils;
 public class QiaoAgent implements IAgent
 {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private String id; // agent Id
+
     private List<IFunnel> funnelList;
-    private StatsManager statsManager;
     private QiaoFileBookKeeper bookKeeper;
     private QiaoFileManager fileManager;
     private boolean enableFileWatcher = true;
     private FileWatchService fileWatcher;
 
     private AtomicBoolean isSuspended = new AtomicBoolean(false);
+    private String historyCacheDir;
 
 
     @Override
     public void init() throws Exception
     {
-        statsManager.init();
+
+        resolveCacheDirectories();
 
         if (bookKeeper != null)
         {
+            bookKeeper.setHistoryCacheDir(historyCacheDir);
             bookKeeper.init();
-            fileManager = ContextUtils.getBean(QiaoFileManager.class);
             fileManager.setBookKeeper(bookKeeper);
             fileManager.init();
 
@@ -70,6 +74,7 @@ public class QiaoAgent implements IAgent
 
         for (IFunnel funnel : funnelList)
         {
+            funnel.setAgentId(id);
             funnel.init();
         }
 
@@ -93,6 +98,8 @@ public class QiaoAgent implements IAgent
                     java.nio.file.StandardWatchEventKinds.ENTRY_DELETE);
         }
 
+        ToolsStore.addFileWatch(id, fileWatcher);
+
         fileWatcher.init();
     }
 
@@ -100,8 +107,6 @@ public class QiaoAgent implements IAgent
     @Override
     public void start() throws Exception
     {
-        // if (positionCache != null)
-        //    positionCache.start();
 
         if (fileManager != null)
             fileManager.start();
@@ -112,11 +117,10 @@ public class QiaoAgent implements IAgent
         for (IFunnel funnel : funnelList)
             funnel.start();
 
-        statsManager.start();
-
         logger.info(this.getClass().getName() + " started");
 
-        logger.info("\n   ------------\n   QIAO started\n   ------------");
+        logger.info("\n   ------------\n   Agent " + id
+                + " started\n   ------------");
 
     }
 
@@ -127,19 +131,23 @@ public class QiaoAgent implements IAgent
         for (IFunnel funnel : funnelList)
             funnel.close();
 
-        statsManager.shutdown();
-
         if (bookKeeper != null)
+        {
             bookKeeper.close();
+            ToolsStore.removeBookKeeper(id);
+        }
 
         if (fileManager != null)
+        {
             fileManager.shutdown();
+            ToolsStore.removeFileManager(id);
+        }
 
         if (fileWatcher != null)
+        {
             fileWatcher.stop();
-
-        //if (positionCache != null)
-        //    positionCache.close();
+            ToolsStore.removeFileWatcher(id);
+        }
 
         logger.info(this.getClass().getName() + " shutdown");
 
@@ -150,12 +158,6 @@ public class QiaoAgent implements IAgent
     public void setFunnels(List<IFunnel> funnelList)
     {
         this.funnelList = funnelList;
-    }
-
-
-    public void setStatsManager(StatsManager statsManager)
-    {
-        this.statsManager = statsManager;
     }
 
 
@@ -173,8 +175,6 @@ public class QiaoAgent implements IAgent
 
             if (fileManager != null)
                 fileManager.suspend();
-
-            statsManager.suspend();
 
             logger.info("==> Agent suspended");
         }
@@ -195,13 +195,12 @@ public class QiaoAgent implements IAgent
                 if (fileWatcher != null)
                     fileWatcher.start();
 
-                statsManager.resume();
-
             }
             catch (Exception e)
             {
                 logger.error(
-                        "failed to start QiaoFileManager: " + e.getMessage(), e);
+                        "failed to start QiaoFileManager: " + e.getMessage(),
+                        e);
                 isSuspended.set(true);
                 return;
             }
@@ -219,6 +218,7 @@ public class QiaoAgent implements IAgent
     public void setBookKeeper(QiaoFileBookKeeper bookKeeper)
     {
         this.bookKeeper = bookKeeper;
+        ToolsStore.addBookKeeper(id, bookKeeper);
     }
 
 
@@ -248,11 +248,40 @@ public class QiaoAgent implements IAgent
     }
 
 
-    @ManagedOperation(description = "Reset statistics counters")
-    public void resetStatsCounters()
+    public String getId()
     {
-        logger.info("reset counters...");
-        statsManager.resetCounters();
+        return id;
+    }
+
+
+    public void setId(String id)
+    {
+        this.id = id;
+    }
+
+
+    public void setFileManager(QiaoFileManager fileManager)
+    {
+        this.fileManager = fileManager;
+        ToolsStore.addFileManager(id, fileManager);
+    }
+
+
+    private void resolveCacheDirectories()
+    {
+        String sep = File.separator;
+
+        String qiao_home = System.getProperty("qiao.home");
+        if (qiao_home == null)
+        {
+            logger.info(
+                    "System property 'qiao.home' not defined.  Set default cache dir to /tmp.");
+            qiao_home = sep + "tmp";
+        }
+
+        String qiao_cache_dir = qiao_home + sep + "qiao_cache";
+
+        this.historyCacheDir = qiao_cache_dir + sep + "history" + sep + id;
     }
 
 }

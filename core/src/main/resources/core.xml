@@ -17,13 +17,17 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 +===================+
    -->
 
+ 
    <bean id="bootstrap" class="com.aol.advertising.qiao.bootstrap.Bootstrap">
       <property name="mbeanDomain" value="${jmx.mbean.domain:qiao}" />
       <property name="mbeanExporter" ref="dynamicMBeanExporter" />
    </bean>
 
-   <bean id="agent" class="com.aol.advertising.qiao.agent.QiaoAgent">
+   <bean id="container" class="com.aol.advertising.qiao.agent.QiaoContainer">
       <property name="statsManager" ref="statsManager" />
+   </bean>
+
+   <bean id="agent" class="com.aol.advertising.qiao.agent.QiaoAgent" scope="prototype">
    </bean>
 
    <bean id="funnel" class="com.aol.advertising.qiao.agent.DataFunnel" scope="prototype">
@@ -47,7 +51,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    </bean>
 
    <bean class="com.aol.advertising.qiao.injector.TailInjector" scope="prototype">
-      <property name="bookKeeper" ref="fileBookKeeper" />
       <property name="fileLockManager" ref="fileLockManager" />
       <property name="delayMillis" value="${injector.tail.pullIntervalMillis:10}" />
       <property name="bufSize" value="${injector.tail.buffersize:4096}" />
@@ -61,7 +64,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    </bean>
 
    <bean class="com.aol.advertising.qiao.injector.PatternMatchFileInjector" scope="prototype">
-      <property name="bookKeeper" ref="fileBookKeeper" />
       <property name="fileLockManager" ref="fileLockManager" />
       <property name="fileCheckDelayMillis" value="${injector.fileinjector.pullIntervalMillis:10}" />
       <property name="bufSize" value="${injector.fileinjector.buffersize:4096}" />
@@ -71,7 +73,6 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <property name="cacheDefaultExpirySecs" value="${injector.fileinjector.positionCache.defaultExpirySecs:604800}" />
       <property name="cacheDiskReapingIntervalSecs" value="${injector.fileinjector.positionCache.diskReapingIntervalSecs:60}" />
       <property name="cacheDiskReapingInitDelaySecs" value="${injector.fileinjector.positionCache.diskReapingInitDelaySecs:60}" />
-      <property name="quarantineFileHandler" ref="quarantineFileHandler" />
    </bean>
 
    <bean id="nopDataHanlder" class="com.aol.advertising.qiao.injector.file.NopDataHandler" scope="prototype" />
@@ -122,34 +123,32 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 +===================+
    -->
 
-   <bean id="qiaoFileManager" class="com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager">
+   <bean id="qiaoFileManager" class="com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager" scope="prototype">
       <property name="srcDir" value="${qiaoFileManager.watch.srcDir:#{null}}" />
       <property name="donefilePattern" value="${qiaoFileManager.watch.donefilePattern:#{null}}" />
       <property name="maxFilesToFind" value="${qiaoFileManager.watch.maxFilesToFind:-1}" />
       <property name="checksumByteLength" value="${qiaoFileManager.checksumByteLength:2048}" />
       <property name="fileCheckDelayMillis" value="${qiaoFileManager.fileCheckDelayMillis:1000}" />
-      <property name="doneFileHandler" ref="doneFileHandler" />
-      <property name="quarantineFileHandler" ref="quarantineFileHandler" />
       <property name="candidateFilesPatternForRename" value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
+      <property name="doneTargetDir" value="${doneFileListener.donefile.move-targetDir:#{null}}" />
+      <property name="doneTargetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy:#{null}}" />
+      <property name="quarantineTargetDir" value="${quarantineFileHandler.move-targetDir:#{null}}" />
+      <property name="quarantineTargetNamingStrategy" value="${quarantineFileHandler.move-targetName.strategy:#{null}}" />
    </bean>
 
-   <bean id="fileBookKeeper" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper">
+   <bean id="fileBookKeeper" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper" scope="prototype">
       <property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath:#{null}}" />
       <property name="cacheDefaultExpirySecs" value="${file.bookkeeper.cache.defaultExpirySecs:604800}" />
       <property name="cacheDiskReapingIntervalSecs" value="${file.bookkeeper.cache.diskReapingIntervalSecs:60}" />
       <property name="cacheDiskReapingInitDelaySecs" value="${file.bookkeeper.cache.diskReapingInitDelaySecs:60}" />
    </bean>
 
-   <bean id="fileWatcher"  class="com.aol.advertising.qiao.injector.file.watcher.FileWatchService" />
+   <bean id="fileWatcher"  class="com.aol.advertising.qiao.injector.file.watcher.FileWatchService" scope="prototype"/>
  
-   <bean id="doneFileHandler" class="com.aol.advertising.qiao.injector.file.DoneFileHandler">
-      <property name="targetDir" value="${doneFileListener.donefile.move-targetDir:#{null}}" />
-      <property name="targetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy:#{null}}" />
+   <bean id="doneFileHandler" class="com.aol.advertising.qiao.injector.file.DoneFileHandler" scope="prototype">
    </bean>
 
-   <bean id="quarantineFileHandler" class="com.aol.advertising.qiao.management.QuarantineFileHandler">
-      <property name="targetDir" value="${quarantineFileHandler.move-targetDir:#{null}}" />
-      <property name="targetNamingStrategy" value="${quarantineFileHandler.move-targetName.strategy:#{null}}" />
+   <bean id="quarantineFileHandler" class="com.aol.advertising.qiao.management.QuarantineFileHandler" scope="prototype">
    </bean>
 
    <bean id="fileLockManager" class="com.aol.advertising.qiao.management.FileLockManager" />

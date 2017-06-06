@@ -72,4 +72,7 @@ public interface IFunnel extends IStatsCollectable, IStatsCalculatorAware
 
     public void setRateLimit(int targetLimitedRate);
 
+
+    public void setAgentId(String agentId);
+
 }

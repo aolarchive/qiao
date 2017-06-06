@@ -41,8 +41,10 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
+import com.aol.advertising.qiao.config.ConfigConstants;
 import com.aol.advertising.qiao.exception.ConfigurationException;
 import com.aol.advertising.qiao.injector.file.DoneFileHandler;
+import com.aol.advertising.qiao.injector.file.DoneFileHandler.TargetNamingStrategy;
 import com.aol.advertising.qiao.injector.file.watcher.FileOperationEvent.EVENT_TYPE;
 import com.aol.advertising.qiao.management.FileReadingPositionCache;
 import com.aol.advertising.qiao.management.ISuspendable;
@@ -50,6 +52,7 @@ import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
 import com.aol.advertising.qiao.management.QiaoFileEntry;
 import com.aol.advertising.qiao.management.QuarantineFileHandler;
 import com.aol.advertising.qiao.util.CommonUtils;
+import com.aol.advertising.qiao.util.ContextUtils;
 import com.aol.advertising.qiao.util.FileFinder;
 
 /**
@@ -95,6 +98,12 @@ public class QiaoFileManager implements Runnable, ISuspendable,
     private BlockingQueue<FileOperationEvent> queue;
     //
     private String filesPatternForRenameOnInit;
+    // for donefileHandler
+    private String doneTargetDir;
+    private TargetNamingStrategy doneTargetNamingStrategy;
+    // for quarantine
+    private String quarantineTargetDir;
+    private TargetNamingStrategy quarantineTargetNamingStrategy;
 
 
     public void init() throws Exception
@@ -131,20 +140,20 @@ public class QiaoFileManager implements Runnable, ISuspendable,
             throw new ConfigurationException("srcDir not defined");
 
         if (donefilePattern == null)
-            throw new ConfigurationException("filePattern not defined");
+            throw new ConfigurationException("donefilePattern not defined");
 
         if (bookKeeper == null)
             throw new ConfigurationException("bookKeeper not set");
 
-        if (doneFileHandler == null)
-            throw new ConfigurationException("doneFileHandler not set");
+//        if (doneFileHandler == null)
+//            throw new ConfigurationException("doneFileHandler not set");
 
         if (candidateFilesPatternForRename == null)
             throw new ConfigurationException(
                     "candidateFilesPatternForRename not defined");
 
-        if (quarantineFileHandler == null)
-            throw new ConfigurationException("quarantineFileHandler not set");
+//        if (quarantineFileHandler == null)
+//            throw new ConfigurationException("quarantineFileHandler not set");
 
     }
 
@@ -156,8 +165,11 @@ public class QiaoFileManager implements Runnable, ISuspendable,
     }
 
 
-    private void _setupDoneFileHandler()
+    private void _setupDoneFileHandler() 
     {
+        doneFileHandler = ContextUtils.getBean(DoneFileHandler.class);
+        doneFileHandler.setTargetDir(doneTargetDir);
+        doneFileHandler.setTargetNamingStrategy(doneTargetNamingStrategy);
         doneFileHandler.setSrcDir(srcDir);
         doneFileHandler.init();
     }
@@ -165,6 +177,9 @@ public class QiaoFileManager implements Runnable, ISuspendable,
 
     private void _setupQuarantineFileHandler()
     {
+        quarantineFileHandler = ContextUtils.getBean(QuarantineFileHandler.class);
+        quarantineFileHandler.setTargetDir(quarantineTargetDir);
+        quarantineFileHandler.setTargetNamingStrategy(quarantineTargetNamingStrategy);
         quarantineFileHandler.setSrcDir(srcDir);
         quarantineFileHandler.init();
     }
@@ -515,10 +530,10 @@ public class QiaoFileManager implements Runnable, ISuspendable,
     }
 
 
-    public void setDoneFileHandler(DoneFileHandler doneFileHandler)
-    {
-        this.doneFileHandler = doneFileHandler;
-    }
+//    public void setDoneFileHandler(DoneFileHandler doneFileHandler)
+//    {
+//        this.doneFileHandler = doneFileHandler;
+//    }
 
 
     @Override
@@ -695,5 +710,42 @@ public class QiaoFileManager implements Runnable, ISuspendable,
             QuarantineFileHandler quarantineFileHandler)
     {
         this.quarantineFileHandler = quarantineFileHandler;
+    }
+
+
+    public void setDoneTargetDir(String targetDir)
+    {
+        this.doneTargetDir = targetDir;
+    }
+
+
+    public void setDoneTargetNamingStrategy(TargetNamingStrategy targetNamingStrategy)
+    {
+        this.doneTargetNamingStrategy = targetNamingStrategy;
+    }
+
+
+    public void setQuarantineTargetDir(String quarantineTargetDir)
+    {
+        this.quarantineTargetDir = quarantineTargetDir;
+    }
+
+
+    public void setQuarantineTargetNamingStrategy(
+            TargetNamingStrategy quarantineTargetNamingStrategy)
+    {
+        this.quarantineTargetNamingStrategy = quarantineTargetNamingStrategy;
+    }
+
+
+    public QuarantineFileHandler getQuarantineFileHandler()
+    {
+        return quarantineFileHandler;
+    }
+
+
+    public QiaoFileBookKeeper getBookKeeper()
+    {
+        return bookKeeper;
     }
 }
