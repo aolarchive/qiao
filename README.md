@@ -15,6 +15,7 @@ Qiao (橋, the Chinese character for “bridge”, pronounced as Chiao) is a sta
 ## Release Notes
 ### Version 0.4-SNAPSHOT (June 2017)
 * Multi-agent support which enables streaming multiple log files in parallel
+* Schema change in qiao.xml.  Qiao.xml in the old schema is required to be modified by adding an <agent> tag around <funnel>.
 * Java 8 
 
 
