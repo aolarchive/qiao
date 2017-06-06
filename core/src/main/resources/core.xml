@@ -131,9 +131,9 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
       <property name="fileCheckDelayMillis" value="${qiaoFileManager.fileCheckDelayMillis:1000}" />
       <property name="candidateFilesPatternForRename" value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
       <property name="doneTargetDir" value="${doneFileListener.donefile.move-targetDir:#{null}}" />
-      <property name="doneTargetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy:#{null}}" />
+      <property name="doneTargetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy:APPEND_SOURCE_MODTIME}" />
       <property name="quarantineTargetDir" value="${quarantineFileHandler.move-targetDir:#{null}}" />
-      <property name="quarantineTargetNamingStrategy" value="${quarantineFileHandler.move-targetName.strategy:#{null}}" />
+      <property name="quarantineTargetNamingStrategy" value="${quarantineFileHandler.move-targetName.strategy:APPEND_SOURCE_MODTIME}" />
    </bean>
 
    <bean id="fileBookKeeper" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper" scope="prototype">
