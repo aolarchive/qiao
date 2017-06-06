@@ -6,8 +6,8 @@
 # Customize the following variables:
 # QIAO_HOME: full path of application's installation directory
 export QIAO_HOME=$PWD
-# JAVA_HOME: Java7 home directory
-export JAVA_HOME=/usr/java/jdk1.7.0_45
+# JAVA_HOME: Java8 home directory
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_72.jdk/Contents/Home
 # MEMSIZE: application's java max virtual memory size
 VMSIZE=1G
 NEWSIZE=256M

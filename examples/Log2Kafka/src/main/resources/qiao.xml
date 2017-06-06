@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <qiao-config>
 
-
+<agent id="log2kafka">
    <funnel id="TailFunnel" auto-start="${LogTailer-autostart}" emitter-threads="${LogTailer-emitter-threads}">
 
       <injector id="tailInjector" class="com.aol.advertising.qiao.injector.TailInjector">
@@ -49,6 +49,9 @@
       </emitter>
 
    </funnel>
+   
+   <property name="fileManager" ref="testFileManager" />
+   <property name="bookKeeper" ref="testFileBookKeeper" />
 
-
+</agent>
 </qiao-config>

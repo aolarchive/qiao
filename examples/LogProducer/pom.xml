@@ -5,12 +5,12 @@
    <groupId>qiao</groupId>
    <artifactId>qiao-example-logproducer</artifactId>
    <packaging>jar</packaging>
-   <version>0.2</version>
+   <version>0.4-SNAPSHOT</version>
    <name>QIAO Example - Log Producer</name>
    <parent>
       <groupId>qiao</groupId>
       <artifactId>qiao-example-pom</artifactId>
-      <version>0.2</version>
+      <version>0.4-SNAPSHOT</version>
    </parent>
 
    <build>
