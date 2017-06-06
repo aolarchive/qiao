@@ -8,7 +8,15 @@ Qiao (橋, the Chinese character for “bridge”, pronounced as Chiao) is a sta
 ![License](http://img.shields.io/badge/license-APACHE2-blue.svg)
 
 ###System Requirements
-* Java 7
+* Java 8
 * Small amount of disk space for cursor position cache and history cache
 
+
+Version 0.4-SNAPSHOT (June 2017)
+* Multi-agent support which enables streaming multiple log files in parallel
+* Java 8 
+
+
+Version 0.3-SNAPSHOT (Feb 2017)
+* Quarantine corrupted avro logs
 
