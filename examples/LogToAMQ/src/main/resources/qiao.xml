@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <qiao-config>
 
-
+<agent id="log2amq">
    <funnel id="TailFunnel" auto-start="${LogTailer-autostart}" emitter-threads="${emitter.amq.numConnections}">
 
       <injector id="tailInjector" class="com.aol.advertising.qiao.injector.TailInjector">
@@ -36,6 +36,9 @@
 
    </funnel>
 
+   <property name="fileManager" ref="testFileManager" />
+   <property name="bookKeeper" ref="testFileBookKeeper" />
 
+</agent>
 
 </qiao-config>

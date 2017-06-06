@@ -12,4 +12,24 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
 
     <bean id="binDataHandler" class="com.aol.advertising.qiao.example.log2amq.MyBinDataHandler" scope="prototype"/>
 
+	<bean id="testFileManager"
+		class="com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager" parent="qiaoFileManager">
+		<property name="srcDir" value="${qiaoFileManager.watch.srcDir:#{null}}" />
+		<property name="donefilePattern"
+			value="${qiaoFileManager.watch.donefilePattern:#{null}}" />
+		<property name="candidateFilesPatternForRename"
+			value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
+		<property name="doneTargetDir"
+			value="${doneFileListener.donefile.move-targetDir:#{null}}" />
+		<property name="doneTargetNamingStrategy"
+			value="${doneFileListener.donefile.move-targetName.strategy:APPEND_SYSTEM_TIME}" />
+		<property name="quarantineTargetDir"
+			value="${quarantineFileHandler.move-targetDir:#{null}}" />
+		<property name="quarantineTargetNamingStrategy"
+			value="${quarantineFileHandler.move-targetName.strategy:APPEND_SYSTEM_TIME}" />
+	</bean>
+
+	<bean id="testFileBookKeeper" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper" parent="fileBookKeeper">
+		<property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath:#{null}}" />
+	</bean>
 </beans>
