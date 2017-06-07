@@ -115,8 +115,9 @@ public class DoneFileHandler
         }
         catch (IOException e)
         {
+            logger.warn(e.getClass().getSimpleName() + ": " + e.getMessage());
             // file manager can move the file before Files.move to happen
-            logger.info("file " + filePath.toString()
+            logger.info("possible cause: file " + filePath.toString()
                     + " not exist - probably already moved");
         }
 
