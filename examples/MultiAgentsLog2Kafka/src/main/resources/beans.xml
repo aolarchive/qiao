@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xmlns:jms="http://www.springframework.org/schema/jms" xmlns:p="http://www.springframework.org/schema/p"
-   xmlns:context="http://www.springframework.org/schema/context" xmlns:task="http://www.springframework.org/schema/task"
-   xmlns:util="http://www.springframework.org/schema/util"
-   xsi:schemaLocation="
+       xmlns:jms="http://www.springframework.org/schema/jms" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd 
 http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
@@ -13,4 +13,28 @@ http://www.springframework.org/schema/util http://www.springframework.org/schema
    <bean id="binDataHandler" class="com.aol.advertising.qiao.example.log2kafka.MyBinDataHandler" scope="prototype" />
 
    <bean id="stringEventHandler" class="com.aol.advertising.qiao.emitter.handler.DefaultKafkaStringMessageHandler" scope="prototype" />
+
+   <bean id="fileManager-2" class="com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager">
+      <property name="srcDir" value="${qiaoFileManager-2.watch.srcDir:#{null}}" />
+      <property name="donefilePattern" value="${qiaoFileManager.watch.donefilePattern:#{null}}" />
+      <property name="maxFilesToFind" value="${qiaoFileManager.watch.maxFilesToFind:-1}" />
+      <property name="checksumByteLength" value="${qiaoFileManager.checksumByteLength:2048}" />
+      <property name="fileCheckDelayMillis" value="${qiaoFileManager.fileCheckDelayMillis:1000}" />
+      <property name="doneFileHandler" ref="doneFileHandler" />
+      <property name="quarantineFileHandler" ref="quarantineFileHandler" />
+      <property name="candidateFilesPatternForRename" value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
+   </bean>
+
+   <bean id="doneFileHandler-2" class="com.aol.advertising.qiao.injector.file.DoneFileHandler">
+      <property name="targetDir" value="${doneFileListener.donefile.move-targetDir:#{null}}" />
+      <property name="targetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy:#{null}}" />
+   </bean>
+
+   <bean id="fileBookKeeper-2" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper">
+      <property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath:#{null}}" />
+      <property name="cacheDefaultExpirySecs" value="${file.bookkeeper.cache.defaultExpirySecs:604800}" />
+      <property name="cacheDiskReapingIntervalSecs" value="${file.bookkeeper.cache.diskReapingIntervalSecs:60}" />
+      <property name="cacheDiskReapingInitDelaySecs" value="${file.bookkeeper.cache.diskReapingInitDelaySecs:60}" />
+   </bean>
+
 </beans>
