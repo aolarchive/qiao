@@ -80,8 +80,8 @@ public class QiaoFileBookKeeper implements IFileOperationListener
             }
             catch (Exception e)
             {
-                throw new ConfigurationException("Failed to initialize: "
-                        + e.getMessage(), e);
+                throw new ConfigurationException(
+                        "Failed to initialize: " + e.getMessage(), e);
             }
 
             logger.info(this.getClass().getName() + " initialized");
@@ -116,10 +116,16 @@ public class QiaoFileBookKeeper implements IFileOperationListener
     public void close()
     {
 
-        flushWriter();
-        IOUtils.closeQuietly(writer);
+        if (null != writer)
+        {
+            flushWriter();
+            IOUtils.closeQuietly(writer);
+        }
 
-        historyCache.close();
+        if (null != historyCache)
+        {
+            historyCache.close();
+        }
 
         isInitialized.set(false);
 
@@ -144,8 +150,9 @@ public class QiaoFileBookKeeper implements IFileOperationListener
 
     public void write(QiaoFileEntry logEntry) throws IOException
     {
-        writer.write(CommonUtils.getFriendlyTimeString(System
-                .currentTimeMillis()) + "," + logEntry.toCsv());
+        writer.write(
+                CommonUtils.getFriendlyTimeString(System.currentTimeMillis())
+                        + "," + logEntry.toCsv());
         writer.newLine();
         flushWriter();
 
@@ -238,7 +245,8 @@ public class QiaoFileBookKeeper implements IFileOperationListener
     }
 
 
-    public void setCacheDiskReapingIntervalSecs(int cacheDiskReapingIntervalSecs)
+    public void setCacheDiskReapingIntervalSecs(
+            int cacheDiskReapingIntervalSecs)
     {
         this.cacheDiskReapingIntervalSecs = cacheDiskReapingIntervalSecs;
     }
