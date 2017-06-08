@@ -103,8 +103,8 @@
 
    </funnel>
 
-   <property name="fileManager-2" ref="testFileManager-2" />
-   <property name="bookKeeper-2" ref="testFileBookKeeper-2" />
+   <property name="fileManager" ref="testFileManager-2" />
+   <property name="bookKeeper" ref="testFileBookKeeper-2" />
 
 </agent>
 </qiao-config>
