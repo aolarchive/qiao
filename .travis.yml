@@ -2,5 +2,5 @@ language: java
 install: mvn clean install -f core/pom.xml
 script: mvn test -f core/pom.xml
 jdk:
-  - oraclejdk7
+  - oraclejdk8
 
