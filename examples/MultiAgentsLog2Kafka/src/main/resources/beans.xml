@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:jms="http://www.springframework.org/schema/jms" xmlns:p="http://www.springframework.org/schema/p"
+   xmlns:context="http://www.springframework.org/schema/context" xmlns:task="http://www.springframework.org/schema/task"
+   xmlns:util="http://www.springframework.org/schema/util"
+   xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd 
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd 
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+   <bean id="binDataHandler" class="com.aol.advertising.qiao.example.log2kafka.MyBinDataHandler" scope="prototype" />
+
+   <bean id="stringEventHandler" class="com.aol.advertising.qiao.emitter.handler.DefaultKafkaStringMessageHandler" scope="prototype" />
+
+	<bean id="testFileManager"
+		class="com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager" parent="qiaoFileManager">
+		<property name="srcDir" value="${qiaoFileManager.watch.srcDir:#{null}}" />
+		<property name="donefilePattern"
+			value="${qiaoFileManager.watch.donefilePattern:#{null}}" />
+		<property name="candidateFilesPatternForRename"
+			value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
+		<property name="doneTargetDir"
+			value="${doneFileListener.donefile.move-targetDir:#{null}}" />
+		<property name="doneTargetNamingStrategy"
+			value="${doneFileListener.donefile.move-targetName.strategy:APPEND_SYSTEM_TIME}" />
+		<property name="quarantineTargetDir"
+			value="${quarantineFileHandler.move-targetDir:#{null}}" />
+		<property name="quarantineTargetNamingStrategy"
+			value="${quarantineFileHandler.move-targetName.strategy:APPEND_SYSTEM_TIME}" />
+	</bean>
+
+	<bean id="testFileBookKeeper" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper" parent="fileBookKeeper">
+		<property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath:#{null}}" />
+	</bean>
+
+	<bean id="testFileManager-2"
+		  class="com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager" parent="qiaoFileManager">
+		<property name="srcDir" value="${qiaoFileManager.watch.srcDir-2:#{null}}" />
+		<property name="donefilePattern"
+				  value="${qiaoFileManager.watch.donefilePattern:#{null}}" />
+		<property name="candidateFilesPatternForRename"
+				  value="${qiaoFileManager.watch.candidateFilesPatternForRename:#{null}}" />
+		<property name="doneTargetDir"
+				  value="${doneFileListener.donefile.move-targetDir:#{null}}" />
+		<property name="doneTargetNamingStrategy"
+				  value="${doneFileListener.donefile.move-targetName.strategy:APPEND_SYSTEM_TIME}" />
+		<property name="quarantineTargetDir"
+				  value="${quarantineFileHandler.move-targetDir:#{null}}" />
+		<property name="quarantineTargetNamingStrategy"
+				  value="${quarantineFileHandler.move-targetName.strategy:APPEND_SYSTEM_TIME}" />
+	</bean>
+
+	<bean id="testFileBookKeeper-2" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper"
+		  parent="fileBookKeeper">
+		<property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath:#{null}}" />
+	</bean>
+	
+</beans>
