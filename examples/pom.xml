@@ -11,6 +11,7 @@
       <module>LogToAMQ</module>
       <module>LogProducer</module>
       <module>Log2Kafka</module>
+      <module>MultiAgentsLog2Kafka</module>
    </modules>
 
    <properties>
