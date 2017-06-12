@@ -5,7 +5,7 @@
    <groupId>qiao</groupId>
    <artifactId>qiao-example-pom</artifactId>
    <packaging>pom</packaging>
-   <version>0.4-SNAPSHOT</version>
+   <version>1.0</version>
    <name>QIAO Example</name>
    <modules>
       <module>LogToAMQ</module>
@@ -34,7 +34,7 @@
       <junit.version>4.11</junit.version>
       <metrics.version>3.0.1</metrics.version>
       <amq.version>5.8.0</amq.version>
-      <qiao.version>0.4-SNAPSHOT</qiao.version>
+      <qiao.version>1.0</qiao.version>
 
    </properties>
 
