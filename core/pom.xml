@@ -5,7 +5,7 @@
 	<groupId>qiao</groupId>
 	<artifactId>qiao-core</artifactId>
 	<packaging>jar</packaging>
-	<version>0.4-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>QIAO Log Streamer</name>
 	<description>
         Qiao is a stand-alone service that streams event data from a file such as event log in real-time 
