@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import com.aol.advertising.qiao.config.PropertyValue.DataType;
 import com.aol.advertising.qiao.config.PropertyValue.Type;
-import com.aol.advertising.qiao.config.QiaoConfig.FunnelComponents;
 import com.aol.advertising.qiao.exception.ConfigurationException;
 import com.aol.advertising.qiao.util.CommonUtils;
 import com.aol.advertising.qiao.util.XmlConfigUtil;
@@ -57,14 +56,14 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     public void load() throws ConfigurationException
     {
         boolean valid = XmlConfigUtil.validateXml(configXmlFileUri,
-                schemaLocationUri);
+            schemaLocationUri);
 
         if (!valid)
             throw new ConfigurationException(
-                    "Invalid Qiao configuration file: " + configXmlFileUri);
+                "Invalid Qiao configuration file: " + configXmlFileUri);
 
         xmlConfig = readConfigurationFiles(configXmlFileUri,
-                configPropertyFiles);
+            configPropertyFiles);
 
         logger.info(configXmlFileUri + " loaded");
 
@@ -76,37 +75,51 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     {
         qiaoConfig = new QiaoConfig();
 
-        MultiSubnodeConfiguration tmp = loadMutiNodeConfigAndProperties(ConfigConstants.CFGKEY_FUNNEL);
-        if (tmp == null)
-        {
-            logger.warn(ConfigConstants.CFGKEY_FUNNEL + " not configured");
-        }
-        else
-        {
-            qiaoConfig.setFunnelConfig(tmp);
-            Map<String, String> classnames = getClassNames(tmp);
-            qiaoConfig.setFunnelClassNames(classnames);
+        MultiSubnodeConfiguration agentsConfig = loadMutiNodeConfigAndProperties(ConfigConstants.CFGKEY_AGENT);
+        if (agentsConfig == null) {
+            logger.warn(ConfigConstants.CFGKEY_AGENT + " not configured");
+        } else {
 
-            Map<String, FunnelComponents> mcomponents = new HashMap<String, FunnelComponents>();
-            for (int i = 0; i < tmp.size(); i++)
-            {
-                FunnelComponents fc = qiaoConfig.new FunnelComponents();
+            qiaoConfig.setAgentsConfig(agentsConfig);
+            Map<String, String> classnames = getClassNames(agentsConfig);
+            qiaoConfig.setAgentClassNames(classnames);
+            Map<String, QiaoConfig.Agent> agents = new HashMap<>();
 
-                fc.setSourceConfig(loadSourceConfig(i));
-                fc.setSinkConfig(loadSinkConfig(i));
-                fc.setId(tmp.get(i).getId());
-                mcomponents.put(fc.getId(), fc);
+            for (int i = 0; i < agentsConfig.size(); i++) {
+                QiaoConfig.Agent agent = qiaoConfig.new Agent();
+                String funnels = String.format(ConfigConstants.CFGKEY_FUNNEL, i);
+                MultiSubnodeConfiguration tmpFunnels = loadMutiNodeConfigAndProperties(funnels);
+
+                if (tmpFunnels == null) {
+                    logger.warn(ConfigConstants.CFGKEY_FUNNEL + " not configured");
+                } else {
+                    agent.setFunnelConfig(tmpFunnels);
+                    Map<String, String> classnamesFunnels = getClassNames(tmpFunnels);
+                    agent.setFunnelClassNames(classnamesFunnels);
+                    Map<String, QiaoConfig.Agent.FunnelComponents> mcomponents = new HashMap<>();
+
+                    for (int j = 0; j < tmpFunnels.size(); j++) {
+                        QiaoConfig.Agent.FunnelComponents fc = agent.new FunnelComponents();
+                        fc.setSourceConfig(loadSourceConfig(i, j));
+                        fc.setSinkConfig(loadSinkConfig(i, j));
+                        fc.setId(tmpFunnels.get(j).getId());
+                        mcomponents.put(fc.getId(), fc);
+                    }
+
+                    agent.setFunnelComponents(mcomponents);
+                }
+
+                agents.put(agentsConfig.get(i).getId(), agent);
             }
-
-            qiaoConfig.setFunnelComponents(mcomponents);
+            qiaoConfig.setAgents(agents);
         }
     }
 
 
-    protected InjectorConfig loadSourceConfig(int idx)
+    protected InjectorConfig loadSourceConfig(int idx, final int idxFunnel)
     {
         String node_idx = String.format(ConfigConstants.CFGKEY_FUNNEL_INJECTOR,
-                idx);
+            idx,idxFunnel);
         InjectorConfig source_cfg = new InjectorConfig();
         SingleSubnodeConfiguration tmp = loadSingleNodeConfigAndProperties(node_idx);
         if (tmp == null)
@@ -118,17 +131,17 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
             source_cfg.setSourceConfig(tmp);
             source_cfg.setId(tmp.getId());
             source_cfg.setSourceClassName((String) tmp
-                    .getAttribute(ConfigConstants.CFGATTR_CLASSNAME));
+                .getAttribute(ConfigConstants.CFGATTR_CLASSNAME));
         }
 
         return source_cfg;
     }
 
 
-    protected EmitterConfig loadSinkConfig(int idx)
+    protected EmitterConfig loadSinkConfig(int idx, final int idxFunnel)
     {
         String node_idx = String.format(ConfigConstants.CFGKEY_FUNNEL_EMITTER,
-                idx);
+            idx,idxFunnel);
 
         EmitterConfig sink_cfg = new EmitterConfig();
         sink_cfg.setEmitterContainerClassName(ConfigConstants.DEFAULT_FUNNEL_EMITTERCONTAINER_CLASSNAME);
@@ -150,7 +163,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
 
 
     private Map<String, String> getClassNames(
-            MultiSubnodeConfiguration clsConfig)
+        MultiSubnodeConfiguration clsConfig)
     {
         if (clsConfig == null)
             return null;
@@ -160,7 +173,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
         {
             Map<String, Object> m = clsConfig.get(i);
             ans.put((String) m.get(ConfigConstants.CFGATTR_ID),
-                    (String) m.get(ConfigConstants.CFGATTR_CLASSNAME));
+                (String) m.get(ConfigConstants.CFGATTR_CLASSNAME));
         }
 
         return ans;
@@ -179,8 +192,8 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
      * @throws ConfigurationException
      */
     protected HierarchicalConfiguration readConfigurationFiles(
-            String xmlConfigFile, String propConfigFiles)
-            throws ConfigurationException
+        String xmlConfigFile, String propConfigFiles)
+        throws ConfigurationException
     {
         try
         {
@@ -199,7 +212,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
 
             // combine xml and properties configurations
             CombinedConfiguration combined_cfg = new CombinedConfiguration(
-                    new OverrideCombiner());
+                new OverrideCombiner());
 
             XMLConfiguration cfg_xml = new XMLConfiguration();
             cfg_xml.setDelimiterParsingDisabled(true);
@@ -223,7 +236,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
             }
 
             HierarchicalConfiguration config = (HierarchicalConfiguration) combined_cfg
-                    .interpolatedConfiguration(); // !!! resolve variables
+                .interpolatedConfiguration(); // !!! resolve variables
 
             return config;
         }
@@ -248,7 +261,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
         logger.debug("------- looking up " + key + " -------");
 
         List<Map<String, Object>> list = XmlConfigUtil
-                .parseMultiNodesAttributes(xmlConfig, key);
+            .parseMultiNodesAttributes(xmlConfig, key);
         if (list == null || list.size() == 0)
             return null;
 
@@ -262,7 +275,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
             single.setId((String) member.get(ConfigConstants.CFGATTR_ID));
 
             Map<String, PropertyValue> prop_map = getPropertyMap(String.format(
-                    ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, i));
+                ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, i));
 
             if (prop_map != null && prop_map.size() > 0)
             {
@@ -277,13 +290,13 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
 
 
     private SingleSubnodeConfiguration loadSingleNodeConfigAndProperties(
-            String key)
+        String key)
     {
 
         logger.debug("------- looking up " + key + " -------");
 
         Map<String, Object> member = XmlConfigUtil.parseSingleNodeAttributes(
-                xmlConfig, key);
+            xmlConfig, key);
         if (member == null || member.size() == 0)
             return null;
 
@@ -292,7 +305,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
         single.setId((String) member.get(ConfigConstants.CFGATTR_ID));
 
         Map<String, PropertyValue> prop_map = getPropertyMap(String.format(
-                ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, 0));
+            ConfigConstants.CFGKEY_PROPERTY_TEMPLATE, key, 0));
 
         if (prop_map != null && prop_map.size() > 0)
         {
@@ -308,7 +321,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
     {
 
         List<Map<String, Object>> list = XmlConfigUtil
-                .parseMultiNodesAttributes(xmlConfig, key);
+            .parseMultiNodesAttributes(xmlConfig, key);
 
         if (list == null || list.size() == 0)
             return null;
@@ -321,7 +334,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
             PropertyValue pv = new PropertyValue();
             String name = (String) props.get(ConfigConstants.CFGATTR_PROP_NAME);
             String value = (String) props
-                    .get(ConfigConstants.CFGATTR_PROP_VALUE);
+                .get(ConfigConstants.CFGATTR_PROP_VALUE);
             if (value != null)
             {
                 pv.setName(name);
@@ -329,7 +342,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
                 pv.setType(Type.IS_VALUE);
 
                 String value_type = (String) props
-                        .get(ConfigConstants.CFGATTR_PROP_TYPE);
+                    .get(ConfigConstants.CFGATTR_PROP_TYPE);
                 if (value_type != null)
                 {
                     DataType dtype = DataType.find(value_type);
@@ -348,7 +361,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
                 }
 
                 String default_value = (String) props
-                        .get(ConfigConstants.CFGATTR_PROP_DEFAULT);
+                    .get(ConfigConstants.CFGATTR_PROP_DEFAULT);
                 if (default_value != null)
                 {
                     pv.setDefaultValue(default_value);
@@ -358,7 +371,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
             else
             {
                 String ref = (String) props
-                        .get(ConfigConstants.CFGATTR_PROP_REF);
+                    .get(ConfigConstants.CFGATTR_PROP_REF);
                 if (ref != null)
                 {
                     pv.setName(name);
@@ -386,7 +399,7 @@ public class AgentXmlConfiguration implements IAgentXmlConfig
 
         logger.debug("------- looking up " + key + " -------");
         Map<String, Object> map = XmlConfigUtil.parseSingleNodeAttributes(
-                xmlConfig, key);
+            xmlConfig, key);
 
         if (logger.isDebugEnabled())
         {

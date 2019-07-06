@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <qiao-config>
 
-
+   <agent id="agent">
    <funnel id="TailFunnel" auto-start="${LogTailer-autostart}" emitter-threads="${LogTailer-emitter-threads}">
 
       <injector id="tailInjector" class="com.aol.advertising.qiao.injector.TailInjector">
@@ -49,6 +49,6 @@
       </emitter>
 
    </funnel>
-
+   </agent>
 
 </qiao-config>

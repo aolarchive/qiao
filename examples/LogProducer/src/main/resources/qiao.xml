@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <qiao-config>
 
-
+   <agent id="agent">
    <funnel id="funnelA" emitter-threads="${funnelA-emitter-threadcount}">
 
       <injector id="randIntegerA" class="com.aol.advertising.qiao.injector.RandomIntegerDataSource">
@@ -11,5 +11,6 @@
 
       <emitter id="echoA" class="com.aol.advertising.qiao.emitter.EchoDataSink" />
    </funnel>
+   </agent>
 
 </qiao-config>
