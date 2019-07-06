@@ -15,32 +15,12 @@
  * limitations under the License.
  ****************************************************************************/
 
-package com.aol.advertising.qiao.agent;
+package com.aol.advertising.qiao.injector;
 
-import java.util.List;
+import com.aol.advertising.qiao.injector.file.DoneFileHandler;
 
-import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
-import com.aol.advertising.qiao.management.ISuspendable;
-import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
-
-public interface IAgent extends ISuspendable
+public interface IInjectDoneFileHandler
 {
-    public void init(final String historyCacheDir, final String historyCacheName) throws Exception;
-
-
-    public void start() throws Exception;
-
-
-    public void shutdown();
-
-
-    public void setFunnels(List<IFunnel> funnelList);
-
-
-    public void setBookKeeper(QiaoFileBookKeeper bookKeeper);
-
-
-    void setFileManager(QiaoFileManager fileManager);
-    //public void setPositionCache(PositionCache positionCache);
+    public void setDoneFileHandler(DoneFileHandler doneFileHandler);
 
 }

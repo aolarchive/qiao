@@ -21,6 +21,5 @@ import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
 
 public interface IInjectBookKeeper
 {
-    public void setBookKeeper(QiaoFileBookKeeper bookKeeper);
-
+    void setFileBookKeeper(QiaoFileBookKeeper bookKeeper);
 }

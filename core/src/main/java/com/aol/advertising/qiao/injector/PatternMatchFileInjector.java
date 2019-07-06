@@ -114,7 +114,7 @@ import com.aol.advertising.qiao.util.cache.PositionCache;
  */
 @ManagedResource
 public class PatternMatchFileInjector<T> implements IDataInjector,
-        IInjectBookKeeper, IInjectPositionCacheDependency, ISuspendable,
+        IInjectBookKeeper, IInjectDoneFileHandler, IInjectPositionCacheDependency, ISuspendable,
         IStatsCalculatorAware
 {
     public enum FileReadStatus
@@ -197,8 +197,6 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         _setupPositionCache();
 
         _setupCallback();
-
-        _setupDoneFileHandler();
 
         _registerStatsCollector();
 
@@ -855,6 +853,11 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         this.dataPipe = dataPipe;
     }
 
+    @Override
+    public void setDoneFileHandler(DoneFileHandler doneFileHandler)
+    {
+        this.doneFileHandler = doneFileHandler;
+    }
 
     @Override
     public void setApplicationEventPublisher(
@@ -976,7 +979,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
 
     @Override
-    public void setBookKeeper(QiaoFileBookKeeper bookKeeper)
+    public void setFileBookKeeper(QiaoFileBookKeeper bookKeeper)
     {
         this.bookKeeper = bookKeeper;
     }
