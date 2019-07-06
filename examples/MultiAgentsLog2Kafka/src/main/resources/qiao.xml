@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qiao-config>
+   <agent id="agent">
+
+      <funnel id="TailFunnel" auto-start="${LogTailer-autostart}" emitter-threads="${LogTailer-emitter-threads}">
+
+         <injector id="tailInjector" class="com.aol.advertising.qiao.injector.TailInjector">
+            <property name="filename" value="${tailinjector.filename}"/>
+            <property name="tailMode" value="${tailinjector.tailmode}"/>
+            <property name="dataHandler" ref="binDataHandler"/>
+            <property name="bufSize" value="${tailinjector.readBufferSize}" type="int"/>
+            <property name="checksumByteLength" value="${tailinjector.checksumByteLength}" type="int"/>
+            <property name="cacheDefaultExpirySecs" value="${tailInjector.positionCache.defaultExpirySecs}"
+                      type="int"/>
+         </injector>
+
+         <emitter id="kafkaEmitter" class="com.aol.advertising.qiao.emitter.KafkaEmitter">
+            <property name="brokerList" value="${emitter.kafka.broker.list}"/>
+            <property name="topic" value="${emitter.kafka.topic}"/>
+            <property name="clientId" value="${emitter.kafka.clientId}"/>
+            <property name="acknowledgePolicy" value="${emitter.kafka.ackPolicy}"/>
+            <property name="serializerClassname" value="kafka.serializer.StringEncoder"/>
+            <property name="keySerializerClassname" value="com.aol.advertising.qiao.emitter.kafka.LongSerializer"/>
+            <property name="messageHandler" ref="stringEventHandler"/>
+            <property name="partitionerClassname"
+                      value="com.aol.advertising.qiao.emitter.kafka.partitioner.RoundRobinPartitioner"/>
+         </emitter>
+
+      </funnel>
+
+      <funnel id="FileFunnel" rate-limit="${FilesFunnel-rate-limit}" auto-start="${FilesFunnel-autostart}"
+              qsize="${FilesFunnel-dataPipeCapacity}">
+
+         <injector id="fileInjector" class="com.aol.advertising.qiao.injector.PatternMatchFileInjector"
+                   initPositionsFrom="tailInjector">
+            <property name="readMode" value="${fileinjector.readmode}"/>
+            <property name="dataHandler" ref="binDataHandler"/>
+            <property name="srcDir" value="${fileinjector.srcDir}"/>
+            <property name="filePattern" value="${fileinjector.filePattern}"/>
+            <doneFileHandler id="doneFileHandler-1">
+               <property name="srcDir" value="${qiaoFileManager.watch.srcDir}"/>
+               <property name="targetDir" value="${doneFileListener.donefile.move-targetDir}"/>
+               <property name="targetNamingStrategy"
+                         value="${doneFileListener.donefile.move-targetName.strategy}"/>
+            </doneFileHandler>
+         </injector>
+
+         <emitter id="kafkaEmitter" class="com.aol.advertising.qiao.emitter.KafkaEmitter">
+            <property name="brokerList" value="${emitter.kafka.broker.list}"/>
+            <property name="topic" value="${emitter.kafka.topic}"/>
+            <property name="clientId" value="${emitter.kafka.clientId}"/>
+            <property name="acknowledgePolicy" value="${emitter.kafka.ackPolicy}"/>
+            <property name="serializerClassname" value="kafka.serializer.StringEncoder"/>
+            <property name="keySerializerClassname" value="com.aol.advertising.qiao.emitter.kafka.LongSerializer"/>
+            <property name="messageHandler" ref="stringEventHandler"/>
+         </emitter>
+
+      </funnel>
+
+      <fileManager id="fileManager-1">
+         <property name="srcDir" value="${qiaoFileManager.watch.srcDir}"/>
+         <property name="donefilePattern" value="${qiaoFileManager.watch.donefilePattern}"/>
+         <property name="maxFilesToFind" value="${qiaoFileManager.watch.maxFilesToFind}"/>
+         <property name="checksumByteLength" value="${qiaoFileManager.checksumByteLength}"/>
+         <property name="fileCheckDelayMillis" value="${qiaoFileManager.fileCheckDelayMillis}"/>
+         <property name="candidateFilesPatternForRename"
+                   value="${qiaoFileManager.watch.candidateFilesPatternForRename}"/>
+         <doneFileHandler id="doneFileHandler-1">
+            <property name="targetDir" value="${doneFileListener.donefile.move-targetDir}"/>
+            <property name="targetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy}"/>
+         </doneFileHandler>
+         <quarantineFileHandler id="quarantineFileHandler-1">
+            <property name="targetDir" value="${quarantineFileHandler.move-targetDir}"/>
+            <property name="targetNamingStrategy" value="${quarantineFileHandler.move-targetName.strategy}"/>
+         </quarantineFileHandler>
+      </fileManager>
+      <fileBookKeeper id="fileBookKeeper" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper">
+         <property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath}"/>
+         <property name="cacheDefaultExpirySecs" value="${file.bookkeeper.cache.defaultExpirySecs}"/>
+         <property name="cacheDiskReapingIntervalSecs" value="${file.bookkeeper.cache.diskReapingIntervalSecs}"/>
+         <property name="cacheDiskReapingInitDelaySecs" value="${file.bookkeeper.cache.diskReapingInitDelaySecs}"/>
+      </fileBookKeeper>
+   </agent>
+
+   <agent id="agent-2">
+
+      <funnel id="TailFunnel" auto-start="${LogTailer-autostart}" emitter-threads="${LogTailer-emitter-threads}">
+
+         <injector id="tailInjector" class="com.aol.advertising.qiao.injector.TailInjector">
+            <property name="filename" value="${tailinjector-2.filename}"/>
+            <property name="tailMode" value="${tailinjector.tailmode}"/>
+            <property name="dataHandler" ref="binDataHandler"/>
+            <property name="bufSize" value="${tailinjector.readBufferSize}" type="int"/>
+            <property name="checksumByteLength" value="${tailinjector.checksumByteLength}" type="int"/>
+            <property name="cacheDefaultExpirySecs" value="${tailInjector.positionCache.defaultExpirySecs}"
+                      type="int"/>
+         </injector>
+
+         <emitter id="kafkaEmitter" class="com.aol.advertising.qiao.emitter.KafkaEmitter">
+            <property name="brokerList" value="${emitter.kafka.broker.list}"/>
+            <property name="topic" value="${emitter.kafka.topic}"/>
+            <property name="clientId" value="${emitter.kafka.clientId}"/>
+            <property name="acknowledgePolicy" value="${emitter.kafka.ackPolicy}"/>
+            <property name="serializerClassname" value="kafka.serializer.StringEncoder"/>
+            <property name="keySerializerClassname" value="com.aol.advertising.qiao.emitter.kafka.LongSerializer"/>
+            <property name="messageHandler" ref="stringEventHandler"/>
+            <property name="partitionerClassname"
+                      value="com.aol.advertising.qiao.emitter.kafka.partitioner.RoundRobinPartitioner"/>
+         </emitter>
+
+      </funnel>
+
+      <funnel id="FileFunnel-2" rate-limit="${FilesFunnel-rate-limit}" auto-start="${FilesFunnel-autostart}"
+              qsize="${FilesFunnel-dataPipeCapacity}">
+
+         <injector id="fileInjector-2" class="com.aol.advertising.qiao.injector.PatternMatchFileInjector"
+                   initPositionsFrom="tailInjector">
+            <property name="readMode" value="${fileinjector.readmode}"/>
+            <property name="dataHandler" ref="binDataHandler"/>
+            <property name="srcDir" value="${fileinjector-2.srcDir}"/>
+            <property name="filePattern" value="${fileinjector.filePattern}"/>
+            <doneFileHandler id="doneFileHandler-1">
+               <property name="srcDir" value="${qiaoFileManager.watch.srcDir}"/>
+               <property name="targetDir" value="${doneFileListener-2.donefile.move-targetDir}"/>
+               <property name="targetNamingStrategy"
+                         value="${doneFileListener.donefile.move-targetName.strategy}"/>
+            </doneFileHandler>
+         </injector>
+
+         <emitter id="kafkaEmitter" class="com.aol.advertising.qiao.emitter.KafkaEmitter">
+            <property name="brokerList" value="${emitter.kafka.broker.list}"/>
+            <property name="topic" value="${emitter.kafka.topic}"/>
+            <property name="clientId" value="${emitter.kafka.clientId}"/>
+            <property name="acknowledgePolicy" value="${emitter.kafka.ackPolicy}"/>
+            <property name="serializerClassname" value="kafka.serializer.StringEncoder"/>
+            <property name="keySerializerClassname" value="com.aol.advertising.qiao.emitter.kafka.LongSerializer"/>
+            <property name="messageHandler" ref="stringEventHandler"/>
+         </emitter>
+
+      </funnel>
+
+      <fileManager id="fileManager-2">
+         <property name="srcDir" value="${qiaoFileManager.watch.srcDir-2}"/>
+         <property name="donefilePattern" value="${qiaoFileManager.watch.donefilePattern}"/>
+         <property name="maxFilesToFind" value="${qiaoFileManager.watch.maxFilesToFind}"/>
+         <property name="checksumByteLength" value="${qiaoFileManager.checksumByteLength}"/>
+         <property name="fileCheckDelayMillis" value="${qiaoFileManager.fileCheckDelayMillis}"/>
+         <property name="quarantineFileHandler" ref="quarantineFileHandler"/>
+         <property name="candidateFilesPatternForRename"
+                   value="${qiaoFileManager.watch.candidateFilesPatternForRename}"/>
+         <doneFileHandler id="doneFileHandler-2">
+            <property name="targetDir" value="${doneFileListener-2.donefile.move-targetDir}"/>
+            <property name="targetNamingStrategy" value="${doneFileListener.donefile.move-targetName.strategy}"/>
+         </doneFileHandler>
+         <quarantineFileHandler id="quarantineFileHandler-2">
+            <property name="targetDir" value="${quarantineFileHandler.move-targetDir}"/>
+            <property name="targetNamingStrategy" value="${quarantineFileHandler.move-targetName.strategy}"/>
+         </quarantineFileHandler>
+      </fileManager>
+      <fileBookKeeper id="fileBookKeeper-2" class="com.aol.advertising.qiao.management.QiaoFileBookKeeper">
+         <property name="qiaoLogStorePath" value="${file.bookkeeper.logfilepath}"/>
+         <property name="cacheDefaultExpirySecs" value="${file.bookkeeper.cache.defaultExpirySecs}"/>
+         <property name="cacheDiskReapingIntervalSecs" value="${file.bookkeeper.cache.diskReapingIntervalSecs}"/>
+         <property name="cacheDiskReapingInitDelaySecs" value="${file.bookkeeper.cache.diskReapingInitDelaySecs}"/>
+      </fileBookKeeper>
+   </agent>
+</qiao-config>

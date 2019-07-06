@@ -1,6 +1,6 @@
 /****************************************************************************
  * Copyright (c) 2015 AOL Inc.
- * @author:     ytung05
+ * @author: ytung05
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,90 +19,167 @@ package com.aol.advertising.qiao.config;
 
 import java.util.Map;
 
-public class QiaoConfig
-{
-    protected MultiSubnodeConfiguration funnelConfig;
-    protected Map<String, String> funnelClassNames; // <id, class>
-    protected Map<String, FunnelComponents> funnelComponents;
+public class QiaoConfig {
 
+    protected Map<String, String> agentClassNames;
+    protected MultiSubnodeConfiguration agentsConfig;
+    protected Map<String, Agent> agents;
 
-    public MultiSubnodeConfiguration getFunnelConfig()
-    {
-        return funnelConfig;
+    public Map<String, String> getAgentClassNames() {
+        return agentClassNames;
     }
 
-
-    public void setFunnelConfig(MultiSubnodeConfiguration funnelConfig)
-    {
-        this.funnelConfig = funnelConfig;
+    public void setAgentClassNames(final Map<String, String> agentClassNames) {
+        this.agentClassNames = agentClassNames;
     }
 
-
-    public Map<String, String> getFunnelClassNames()
-    {
-        return funnelClassNames;
+    public Map<String, Agent> getAgents() {
+        return agents;
     }
 
-
-    public void setFunnelClassNames(Map<String, String> funnelClassNames)
-    {
-        this.funnelClassNames = funnelClassNames;
+    public void setAgents(final Map<String, Agent> agents) {
+        this.agents = agents;
     }
 
-
-    public Map<String, FunnelComponents> getFunnelComponents()
-    {
-        return funnelComponents;
+    public MultiSubnodeConfiguration getAgentsConfig() {
+        return agentsConfig;
     }
 
-
-    public void setFunnelComponents(
-            Map<String, FunnelComponents> funnelComponents)
-    {
-        this.funnelComponents = funnelComponents;
+    public void setAgentsConfig(final MultiSubnodeConfiguration agentsConfig) {
+        this.agentsConfig = agentsConfig;
     }
 
-    public class FunnelComponents
-    {
+    public class Agent {
+
+        public class FileManagerConfig {
+            protected SingleSubnodeConfiguration fileManagerConfiguration;
+            protected SingleSubnodeConfiguration quarantineFileHandlerConfiguration;
+            protected SingleSubnodeConfiguration doneFileHandlerConfiguration;
+            protected SingleSubnodeConfiguration fileBookKepperConfiguration;
+
+            public SingleSubnodeConfiguration getFileManagerConfiguration() {
+                return fileManagerConfiguration;
+            }
+
+            public void setFileManagerConfiguration(final SingleSubnodeConfiguration fileManagerConfiguration) {
+                this.fileManagerConfiguration = fileManagerConfiguration;
+            }
+
+            public SingleSubnodeConfiguration getQuarantineFileHandlerConfiguration() {
+                return quarantineFileHandlerConfiguration;
+            }
+
+            public void setQuarantineFileHandlerConfiguration(final SingleSubnodeConfiguration quarantineFileHandlerConfiguration) {
+                this.quarantineFileHandlerConfiguration = quarantineFileHandlerConfiguration;
+            }
+
+            public SingleSubnodeConfiguration getDoneFileHandlerConfiguration() {
+                return doneFileHandlerConfiguration;
+            }
+
+            public void setDoneFileHandlerConfiguration(final SingleSubnodeConfiguration doneFileHandlerConfiguration) {
+                this.doneFileHandlerConfiguration = doneFileHandlerConfiguration;
+            }
+
+            public void setFileBookKepperConfiguration(final SingleSubnodeConfiguration fileBookKepperConfiguration) {
+                this.fileBookKepperConfiguration = fileBookKepperConfiguration;
+            }
+
+            public SingleSubnodeConfiguration getFileBookKepperConfiguration() {
+                return fileBookKepperConfiguration;
+            }
+        }
+
         private String id;
-        private InjectorConfig sourceConfig;
-        private EmitterConfig sinkConfig;
+        protected MultiSubnodeConfiguration funnelConfig;
+        protected Map<String, String> funnelClassNames; // <id, class>
+        protected Map<String, FunnelComponents> funnelComponents;
+        protected FileManagerConfig fileManagerConfig;
 
+        public FileManagerConfig getFileManagerConfig() {
+            return fileManagerConfig;
+        }
 
-        public String getId()
-        {
+        public void setFileManagerConfig(final FileManagerConfig fileManagerConfig) {
+            this.fileManagerConfig = fileManagerConfig;
+        }
+
+        public String getId() {
             return id;
         }
 
-
-        public void setId(String id)
-        {
+        public void setId(final String id) {
             this.id = id;
         }
 
-
-        public InjectorConfig getSourceConfig()
-        {
-            return sourceConfig;
+        public MultiSubnodeConfiguration getFunnelConfig() {
+            return funnelConfig;
         }
 
 
-        public void setSourceConfig(InjectorConfig sourceConfig)
-        {
-            this.sourceConfig = sourceConfig;
+        public void setFunnelConfig(MultiSubnodeConfiguration funnelConfig) {
+            this.funnelConfig = funnelConfig;
         }
 
 
-        public EmitterConfig getSinkConfig()
-        {
-            return sinkConfig;
+        public Map<String, String> getFunnelClassNames() {
+            return funnelClassNames;
         }
 
 
-        public void setSinkConfig(EmitterConfig sinkConfig)
-        {
-            this.sinkConfig = sinkConfig;
+        public void setFunnelClassNames(Map<String, String> funnelClassNames) {
+            this.funnelClassNames = funnelClassNames;
         }
+
+
+        public Map<String, FunnelComponents> getFunnelComponents() {
+            return funnelComponents;
+        }
+
+
+        public void setFunnelComponents(
+            Map<String, FunnelComponents> funnelComponents) {
+            this.funnelComponents = funnelComponents;
+        }
+
+
+        public class FunnelComponents {
+            private String id;
+            private InjectorConfig sourceConfig;
+            private EmitterConfig sinkConfig;
+
+
+            public String getId() {
+                return id;
+            }
+
+
+            public void setId(String id) {
+                this.id = id;
+            }
+
+
+            public InjectorConfig getSourceConfig() {
+                return sourceConfig;
+            }
+
+
+            public void setSourceConfig(InjectorConfig sourceConfig) {
+                this.sourceConfig = sourceConfig;
+            }
+
+
+            public EmitterConfig getSinkConfig() {
+                return sinkConfig;
+            }
+
+
+            public void setSinkConfig(EmitterConfig sinkConfig) {
+                this.sinkConfig = sinkConfig;
+            }
+        }
+
+
     }
 
 }

@@ -24,15 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 import com.aol.advertising.qiao.agent.IAgent;
 import com.aol.advertising.qiao.agent.IFunnel;
 import com.aol.advertising.qiao.agent.QiaoAgent;
@@ -41,8 +32,8 @@ import com.aol.advertising.qiao.config.ConfigConstants;
 import com.aol.advertising.qiao.config.EmitterConfig;
 import com.aol.advertising.qiao.config.InjectorConfig;
 import com.aol.advertising.qiao.config.MultiSubnodeConfiguration;
+import com.aol.advertising.qiao.config.PropertyValue;
 import com.aol.advertising.qiao.config.QiaoConfig;
-import com.aol.advertising.qiao.config.QiaoConfig.FunnelComponents;
 import com.aol.advertising.qiao.config.SingleSubnodeConfiguration;
 import com.aol.advertising.qiao.emitter.IDataEmitter;
 import com.aol.advertising.qiao.emitter.IDataEmitterContainer;
@@ -51,16 +42,30 @@ import com.aol.advertising.qiao.injector.IDataInjector;
 import com.aol.advertising.qiao.injector.IInjectBookKeeper;
 import com.aol.advertising.qiao.injector.IInjectPositionCache;
 import com.aol.advertising.qiao.injector.IInjectPositionCacheDependency;
+import com.aol.advertising.qiao.injector.PatternMatchFileInjector;
+import com.aol.advertising.qiao.injector.file.DoneFileHandler;
+import com.aol.advertising.qiao.injector.file.watcher.QiaoFileManager;
 import com.aol.advertising.qiao.management.IStatsCalculatorAware;
 import com.aol.advertising.qiao.management.IStatsCollectable;
 import com.aol.advertising.qiao.management.QiaoFileBookKeeper;
+import com.aol.advertising.qiao.management.QuarantineFileHandler;
 import com.aol.advertising.qiao.management.jmx.DynamicMBeanExporter;
 import com.aol.advertising.qiao.management.metrics.IStatisticsStore;
 import com.aol.advertising.qiao.management.metrics.StatsCalculator;
 import com.aol.advertising.qiao.management.metrics.StatsCollector;
+import com.aol.advertising.qiao.management.metrics.StatsManager;
 import com.aol.advertising.qiao.util.CommonUtils;
 import com.aol.advertising.qiao.util.ContextUtils;
 import com.aol.advertising.qiao.util.cache.PositionCache;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * Qiao's bootstrap process starts by loading qiao.xml and creates an agent
@@ -73,11 +78,16 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     private static final String springContext = "applicationContext.xml";
 
     private static ApplicationContext appCtx;
+
+    @Autowired
     private static Bootstrap bootstrap;
+
+    @Autowired
+    private StatsManager statsManager;
 
     // -----------------------------------------
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private IAgent agent;
+    private List<IAgent> agents;
     private AgentXmlConfiguration agentConfig;
 
     private Map<String, Object> mbeanMap = new HashMap<String, Object>();
@@ -95,6 +105,8 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
     private List<InjectorCachePair> injectorList = new ArrayList<InjectorCachePair>();
 
+    @Autowired
+    private Map<String,IAgent> listAgents;
 
     /**
      * @param args
@@ -136,7 +148,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
 
     private static AgentXmlConfiguration loadCofiguration(String funnelCfgXml,
-            String cfgProperties)
+                                                          String cfgProperties)
     {
         AgentXmlConfiguration agent_config = new AgentXmlConfiguration();
         agent_config.setConfigXmlFileUri(funnelCfgXml);
@@ -145,13 +157,13 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         if (StringUtils.isBlank(cfg_dir))
         {
             System.err.println("System Property '"
-                    + ConfigConstants.PROP_QIAO_CFG_DIR
-                    + "' has not been set. Process aborted.");
+                + ConfigConstants.PROP_QIAO_CFG_DIR
+                + "' has not been set. Process aborted.");
             System.exit(-1);
         }
 
         agent_config.setConfigPropertyFiles(String.format(cfgProperties,
-                cfg_dir));
+            cfg_dir));
 
         agent_config.load();
 
@@ -170,8 +182,20 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         statsCollector = getStatsCollector();
         statsCalculator = getStatsCalculator();
 
-        agent = composeAgent();
-        agent.init();
+        //    agents = composeAgents();
+        List<IAgent> listAgents = createAgents();
+//        loadMBeanExporter();
+        for (IAgent agent: listAgents) {
+            resolveCacheDirectories();
+            agent.setStatsManager(statsManager);
+            bookKeeper.setHistoryCacheDir(historyCacheDir);
+            bookKeeper.setHistoryCacheName(historyCacheName);
+            agent.setBookKeeper(bookKeeper);
+            agent.init();
+        }
+        loadMBeanExporter();
+
+        agents = listAgents;
 
     }
 
@@ -183,21 +207,28 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     }
 
 
-    private IAgent composeAgent() throws ClassNotFoundException
+    private List<IAgent> composeAgents() throws ClassNotFoundException
     {
-        IAgent agent = appCtx.getBean(QiaoAgent.class);
+        List<IAgent> agents = new ArrayList<>();
 
-        resolveCacheDirectories();
+        for (Map.Entry<String,IAgent> agentEntry : listAgents.entrySet()){
 
-        agent.setFunnels(createFunnels());
-        mbeanMap.put(mbeanDomain + ":type=QiaoAgent", agent);
+            IAgent agent = agentEntry.getValue();
+            resolveCacheDirectories();
 
-        if (bookKeeper != null)
-            agent.setBookKeeper(bookKeeper);
+            agent.setFunnels(createFunnels(agentEntry.getKey()));
+            mbeanMap.put(mbeanDomain + ":type=QiaoAgent", agent);
 
+            if (bookKeeper != null)
+                agent.setBookKeeper(bookKeeper);
+
+
+            agents.add(agent);
+        }
         loadMBeanExporter();
-        return agent;
+        return agents;
     }
+
 
 
     private void resolveCacheDirectories()
@@ -218,42 +249,45 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     }
 
 
-    private List<IFunnel> createFunnels() throws ClassNotFoundException
+    private List<IFunnel> createFunnels( String id) throws ClassNotFoundException
     {
-        List<IFunnel> flist = new ArrayList<IFunnel>();
+        List<IFunnel> funnelList = new ArrayList<>();
+        QiaoConfig cfgC = agentConfig.getQiaoConfig();
+        Map<String, QiaoConfig.Agent> msubCfgAgent = cfgC.getAgents();
 
-        QiaoConfig cfg = agentConfig.getQiaoConfig();
+        QiaoConfig.Agent cfg = msubCfgAgent.get(id);
+        if (cfg == null) return funnelList;
         Map<String, String> id_map = cfg.getFunnelClassNames();
 
-        Map<String, FunnelComponents> components = cfg.getFunnelComponents();
+        Map<String, QiaoConfig.Agent.FunnelComponents> components = cfg.getFunnelComponents();
 
         MultiSubnodeConfiguration msub_cfg = cfg.getFunnelConfig();
         for (SingleSubnodeConfiguration sub : msub_cfg)
         {
-            String funnel_id = sub.getId();
-            String clzname = id_map.get(funnel_id);
+            String funnelId = sub.getId();
+            String clzname = id_map.get(funnelId);
             if (clzname == null)
                 clzname = ConfigConstants.DEFAULT_FUNNEL_CLASSNAME;
 
             IFunnel funnel = this.<IFunnel> getBean(clzname);
-            funnel.setId(funnel_id);
+            funnel.setId(funnelId);
             ContextUtils.injectMethods(funnel, sub);
 
             String oname_pfx = mbeanDomain + ":type=Funnel-" + funnel.getId();
 
-            FunnelComponents fc = components.get(funnel_id);
+            QiaoConfig.Agent.FunnelComponents fc = components.get(funnelId);
             IDataInjector source = this
-                    .createDataInjector(fc.getSourceConfig());
-            source.setFunnelId(funnel_id);
-            IDataEmitterContainer sink = this.createDataEmitter(funnel_id,
-                    fc.getSinkConfig(), oname_pfx);
-            sink.setFunnelId(funnel_id);
+                .createDataInjector(fc.getSourceConfig());
+            source.setFunnelId(funnelId);
+            IDataEmitterContainer sink = this.createDataEmitter(funnelId,
+                fc.getSinkConfig(), oname_pfx);
+            sink.setFunnelId(funnelId);
 
             funnel.setDataInjector(source);
             funnel.setDataEmitter(sink);
 
             String s = (String) sub
-                    .getAttribute(ConfigConstants.CFGATTR_EMITTER_THREAD_COUNT); // thread count
+                .getAttribute(ConfigConstants.CFGATTR_EMITTER_THREAD_COUNT); // thread count
             if (s != null)
                 funnel.setEmitterThreadCount(Integer.parseInt(s));
 
@@ -272,7 +306,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
             IStatisticsStore stats_store = getStatsStore(); // one per funnel
             funnel.setStatsStore(stats_store);
 
-            flist.add(funnel);
+            funnelList.add(funnel);
 
             mbeanMap.put(oname_pfx, funnel);
             mbeanMap.put(oname_pfx + ",name=" + source.getId(), source);
@@ -284,7 +318,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         for (InjectorCachePair pair : injectorList)
         {
             if (pair.initFromId != null
-                    && (pair.injector instanceof IInjectPositionCacheDependency))
+                && (pair.injector instanceof IInjectPositionCacheDependency))
             {
                 IInjectPositionCacheDependency to_cache = (IInjectPositionCacheDependency) pair.injector;
 
@@ -295,19 +329,209 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
                     if (from.injector.getId().equals(pair.initFromId))
                     {
                         to_cache.setPositionCacheDependency(from.positionCache);
-                     }
+                    }
                 }
             }
         }
-        return flist;
+        return funnelList;
+    }
+
+    private List<IAgent> createAgents() throws ClassNotFoundException
+    {
+        List<IAgent> agentList = new ArrayList<>();
+        QiaoConfig cfgC = agentConfig.getQiaoConfig();
+
+        for (Map.Entry<String, QiaoConfig.Agent> agentConfig : cfgC.getAgents().entrySet()) {
+
+            IAgent agent = new QiaoAgent();
+
+            QiaoConfig.Agent cfg = agentConfig.getValue();
+
+            Map<String, String> id_map = cfg.getFunnelClassNames();
+
+            Map<String, QiaoConfig.Agent.FunnelComponents> components = cfg.getFunnelComponents();
+
+            MultiSubnodeConfiguration msub_cfg = cfg.getFunnelConfig();
+            List<IFunnel> funnelList = new ArrayList<>();
+            for (SingleSubnodeConfiguration sub : msub_cfg) {
+                String funnelId = sub.getId();
+                String clzname = id_map.get(funnelId);
+                if (clzname == null)
+                    clzname = ConfigConstants.DEFAULT_FUNNEL_CLASSNAME;
+
+                IFunnel funnel = this.<IFunnel>getBean(clzname);
+                funnel.setId(funnelId);
+                ContextUtils.injectMethods(funnel, sub);
+
+                String oname_pfx = mbeanDomain + ":type=Funnel-" + funnel.getId();
+
+                QiaoConfig.Agent.FunnelComponents fc = components.get(funnelId);
+                IDataInjector source = this
+                    .createDataInjector(fc.getSourceConfig());
+                source.setFunnelId(funnelId);
+                IDataEmitterContainer sink = this.createDataEmitter(funnelId,
+                    fc.getSinkConfig(), oname_pfx);
+                sink.setFunnelId(funnelId);
+
+                funnel.setDataInjector(source);
+                funnel.setDataEmitter(sink);
+
+                String s = (String) sub
+                    .getAttribute(ConfigConstants.CFGATTR_EMITTER_THREAD_COUNT); // thread count
+                if (s != null)
+                    funnel.setEmitterThreadCount(Integer.parseInt(s));
+
+                s = (String) sub.getAttribute(ConfigConstants.CFGATTR_QSIZE);
+                if (s != null)
+                    funnel.setDataPipeCapacity(Integer.parseInt(s));
+
+                s = (String) sub.getAttribute(ConfigConstants.CFGATTR_RATELIMIT);
+                if (s != null)
+                    funnel.setRateLimit(Integer.parseInt(s));
+
+                s = (String) sub.getAttribute(ConfigConstants.CFGATTR_AUTOSTART);
+                if (s != null)
+                    funnel.setAutoStart(Boolean.parseBoolean(s));
+
+                IStatisticsStore stats_store = getStatsStore(); // one per funnel
+                funnel.setStatsStore(stats_store);
+
+                funnelList.add(funnel);
+
+                mbeanMap.put(oname_pfx, funnel);
+                mbeanMap.put(oname_pfx + ",name=" + source.getId(), source);
+                // mbeanMap.put(oname_pfx + ",name=" + sink.getId(), sink);
+                mbeanMap.put(oname_pfx + ",name=Statistics", stats_store);
+
+            }
+            agent.setFunnels(funnelList);
+
+            for (InjectorCachePair pair : injectorList) {
+                if (pair.initFromId != null
+                    && (pair.injector instanceof IInjectPositionCacheDependency)) {
+                    IInjectPositionCacheDependency to_cache = (IInjectPositionCacheDependency) pair.injector;
+
+                    Iterator<InjectorCachePair> iter = injectorList.iterator();
+                    while (iter.hasNext()) {
+                        InjectorCachePair from = iter.next();
+                        if (from.injector.getId().equals(pair.initFromId)) {
+                            to_cache.setPositionCacheDependency(from.positionCache);
+                        }
+                    }
+                }
+            }
+
+            SingleSubnodeConfiguration fileManagerConfig = cfg.getFileManagerConfig().getFileManagerConfiguration();
+
+            Map<String, PropertyValue> mapFileManagerConfig = fileManagerConfig.getProperties();
+
+            QiaoFileManager fileManager = new QiaoFileManager();
+
+            if (mapFileManagerConfig.containsKey("srcDir")){
+                String srcDir =  mapFileManagerConfig.get("srcDir").getValue();
+                fileManager.setSrcDir(srcDir);
+            }
+            if (mapFileManagerConfig.containsKey("donefilePattern")){
+                String donefilePattern =  mapFileManagerConfig.get("donefilePattern").getValue();
+                fileManager.setDonefilePattern(donefilePattern);
+            }
+            if (mapFileManagerConfig.containsKey("maxFilesToFind")){
+                String maxFilesToFind =  mapFileManagerConfig.get("maxFilesToFind").getValue();
+                fileManager.setMaxFilesToFind(Integer.parseInt(maxFilesToFind));
+            }
+            if (mapFileManagerConfig.containsKey("checksumByteLength")){
+                String checksumByteLength =  mapFileManagerConfig.get("checksumByteLength").getValue();
+                fileManager.setChecksumByteLength(Integer.parseInt(checksumByteLength));
+            }
+            if (mapFileManagerConfig.containsKey("fileCheckDelayMillis")){
+                String fileCheckDelayMillis =  mapFileManagerConfig.get("fileCheckDelayMillis").getValue();
+                fileManager.setFileCheckDelayMillis(Long.parseLong(fileCheckDelayMillis));
+            }
+            if (mapFileManagerConfig.containsKey("candidateFilesPatternForRename")){
+                String candidateFilesPatternForRename =  mapFileManagerConfig.get("candidateFilesPatternForRename").getValue();
+                fileManager.setCandidateFilesPatternForRename(candidateFilesPatternForRename);
+            }
+
+            SingleSubnodeConfiguration doneFileHandlerConfiguration = cfg.getFileManagerConfig()
+                .getDoneFileHandlerConfiguration();
+
+            Map<String, PropertyValue> mapDoneFileHandlerConfiguration = doneFileHandlerConfiguration.getProperties();
+
+            DoneFileHandler doneFileHandler = new DoneFileHandler();
+
+            if (mapDoneFileHandlerConfiguration.containsKey("targetDir")){
+                String targetDir =  mapDoneFileHandlerConfiguration.get("targetDir").getValue();
+                doneFileHandler.setTargetDir(targetDir);
+            }
+
+            if (mapDoneFileHandlerConfiguration.containsKey("targetNamingStrategy")){
+                String targetNamingStrategy =  mapDoneFileHandlerConfiguration.get("targetNamingStrategy").getValue();
+                doneFileHandler.setTargetNamingStrategy(DoneFileHandler.TargetNamingStrategy.valueOf
+                    (targetNamingStrategy));
+            }
+            fileManager.setDoneFileHandler(doneFileHandler);
+
+            SingleSubnodeConfiguration quarantineFileHandlerConfiguration = cfg.getFileManagerConfig()
+                .getQuarantineFileHandlerConfiguration();
+
+            Map<String, PropertyValue> mapQuarantineFileHandlerConfiguration = quarantineFileHandlerConfiguration
+                .getProperties();
+
+            QuarantineFileHandler quarantineFileHandler = new QuarantineFileHandler();
+            if (mapQuarantineFileHandlerConfiguration.containsKey("targetNamingStrategy")){
+                String targetNamingStrategy =  mapQuarantineFileHandlerConfiguration.get("targetNamingStrategy").getValue();
+                quarantineFileHandler.setTargetNamingStrategy(DoneFileHandler.TargetNamingStrategy.valueOf
+                    (targetNamingStrategy));
+            }
+
+            if (mapQuarantineFileHandlerConfiguration.containsKey("targetDir")){
+                String targetDir =  mapQuarantineFileHandlerConfiguration.get("targetDir").getValue();
+                quarantineFileHandler.setTargetDir(targetDir);
+            }
+
+            fileManager.setQuarantineFileHandler(quarantineFileHandler);
+
+            SingleSubnodeConfiguration fileBookKeeperConfiguration = cfg.getFileManagerConfig()
+                .getFileBookKepperConfiguration();
+
+            Map<String, PropertyValue> mapFileBookKeeperConfiguration = fileBookKeeperConfiguration
+                .getProperties();
+
+            QiaoFileBookKeeper qiaoFileBookKeeper = new QiaoFileBookKeeper();
+            if (mapFileBookKeeperConfiguration.containsKey("qiaoLogStorePath")){
+                String qiaoLogStorePath =  mapFileBookKeeperConfiguration.get("qiaoLogStorePath").getValue();
+                qiaoFileBookKeeper.setQiaoLogStorePath(qiaoLogStorePath);
+            }
+
+            if (mapFileBookKeeperConfiguration.containsKey("cacheDefaultExpirySecs")){
+                String cacheDefaultExpirySecs =  mapFileBookKeeperConfiguration.get("cacheDefaultExpirySecs").getValue();
+                qiaoFileBookKeeper.setCacheDefaultExpirySecs(Integer.parseInt(cacheDefaultExpirySecs));
+            }
+
+            if (mapFileBookKeeperConfiguration.containsKey("cacheDiskReapingIntervalSecs")){
+                String cacheDiskReapingIntervalSecs =  mapFileBookKeeperConfiguration.get("cacheDiskReapingIntervalSecs").getValue();
+                qiaoFileBookKeeper.setCacheDiskReapingIntervalSecs(Integer.parseInt(cacheDiskReapingIntervalSecs));
+            }
+
+            if (mapFileBookKeeperConfiguration.containsKey("cacheDiskReapingInitDelaySecs")){
+                String cacheDiskReapingInitDelaySecs =  mapFileBookKeeperConfiguration.get("cacheDiskReapingInitDelaySecs").getValue();
+                qiaoFileBookKeeper.setCacheDiskReapingInitDelaySecs(Integer.parseInt(cacheDiskReapingInitDelaySecs));
+            }
+
+            mbeanMap.put(mbeanDomain + ":type=QiaoAgent", agent);
+            agent.setFileManager(fileManager);
+            agentList.add(agent);
+        }
+
+        return agentList;
     }
 
 
     private IDataInjector createDataInjector(InjectorConfig srcCfg)
-            throws ClassNotFoundException
+        throws ClassNotFoundException
     {
         IDataInjector src = this.<IDataInjector> getBean(srcCfg
-                .getSourceClassName());
+            .getSourceClassName());
         src.setId(srcCfg.getId());
 
         // set instance-specific property values
@@ -316,7 +540,34 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         {
             ContextUtils.injectMethods(src, sub_cfg);
         }
+        if (src instanceof PatternMatchFileInjector
+            && srcCfg.getDoneFileHander() != null)
+        {
 
+            Map<String, PropertyValue> mapDoneFileHandlerConfiguration =srcCfg.getDoneFileHander().getProperties();
+
+            DoneFileHandler doneFileHandler = new DoneFileHandler();
+
+            if (mapDoneFileHandlerConfiguration.containsKey("targetDir")){
+                String targetDir =  mapDoneFileHandlerConfiguration.get("targetDir").getValue();
+                doneFileHandler.setTargetDir(targetDir);
+            }
+
+            if (mapDoneFileHandlerConfiguration.containsKey("srcDir")){
+                String srcDir =  mapDoneFileHandlerConfiguration.get("srcDir").getValue();
+                doneFileHandler.setSrcDir(srcDir);
+            }
+
+            if (mapDoneFileHandlerConfiguration.containsKey("targetNamingStrategy")){
+                String targetNamingStrategy =  mapDoneFileHandlerConfiguration.get("targetNamingStrategy").getValue();
+                doneFileHandler.setTargetNamingStrategy(DoneFileHandler.TargetNamingStrategy.valueOf
+                    (targetNamingStrategy));
+            }
+
+
+            ((PatternMatchFileInjector) src).setDoneFileHandler(doneFileHandler);
+            doneFileHandler.init();
+        }
         // inject position cache if needed
         if (src instanceof IInjectPositionCache)
         {
@@ -334,16 +585,16 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
             pair.positionCache = bean.getPositionCache();
 
             String other_injector_id = (String) sub_cfg
-                    .getAttribute(ConfigConstants.CFGATTR_INIT_POSITIONS_FROM);
+                .getAttribute(ConfigConstants.CFGATTR_INIT_POSITIONS_FROM);
             if (other_injector_id != null)
             {
                 if (!(src instanceof IInjectPositionCacheDependency))
                     throw new ConfigurationException(
-                            "injector "
-                                    + src.getId()
-                                    + " does not implement IHasPositionCacheDependency while "
-                                    + ConfigConstants.CFGATTR_INIT_POSITIONS_FROM
-                                    + " specified");
+                        "injector "
+                            + src.getId()
+                            + " does not implement IHasPositionCacheDependency while "
+                            + ConfigConstants.CFGATTR_INIT_POSITIONS_FROM
+                            + " specified");
 
                 pair.initFromId = other_injector_id;
             }
@@ -360,33 +611,33 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     private PositionCache createPositionCache(String id)
     {
         PositionCache position_cache = ContextUtils
-                .getBean(PositionCache.class);
+            .getBean(PositionCache.class);
         String env_dir = (id == null ? cacheDir : cacheDir + File.separator
-                + id);
+            + id);
         String dbname = (id == null ? cacheName : cacheName + id);
         String thread_name = (id == null ? "PositionCache" : "PositionCache_"
-                + id);
+            + id);
 
         position_cache.setDbEnvDir(env_dir);
         position_cache.setDatabaseName(dbname);
         position_cache.setDataBinding();
         position_cache.setScheduler(CommonUtils
-                .createScheduledThreadPoolExecutor(1,
-                        CommonUtils.resolveThreadName(thread_name)));
+            .createScheduledThreadPoolExecutor(1,
+                CommonUtils.resolveThreadName(thread_name)));
 
         logger.info("PositionCache created => DbEnvDir=" + env_dir
-                + ", DatabaseName=" + dbname);
+            + ", DatabaseName=" + dbname);
         return position_cache;
     }
 
 
     private IDataEmitterContainer createDataEmitter(String funnelId,
-            EmitterConfig emitterCfg, String jmxObjnamePrefix)
-            throws ClassNotFoundException
+                                                    EmitterConfig emitterCfg, String jmxObjnamePrefix)
+        throws ClassNotFoundException
     {
         IDataEmitterContainer container = this
-                .<IDataEmitterContainer> getBean(emitterCfg
-                        .getEmitterContainerClassName());
+            .<IDataEmitterContainer> getBean(emitterCfg
+                .getEmitterContainerClassName());
 
         //String oname_pfx = jmxObjnamePrefix + ",name=" + container.getId();
         String oname_pfx = jmxObjnamePrefix;
@@ -424,17 +675,20 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
     @Override
     public void start() throws Exception
     {
-        logger.info("Starting agent...");
-        agent.start();
+        logger.info("Starting agents...");
+        for (IAgent agent : agents) {
+            agent.start();
+        }
     }
 
 
     @Override
     public void stop()
     {
-        if (agent != null)
-        {
-            agent.shutdown();
+        if (agents != null) {
+            for (IAgent agent : agents) {
+                agent.shutdown();
+            }
         }
     }
 
@@ -456,7 +710,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
         if (o == null)
         {
             logger.info("Instantiate the class " + className
-                    + " since no such spring bean defined");
+                + " since no such spring bean defined");
             Class< ? > clz = Class.forName(className);
             try
             {
@@ -465,7 +719,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
             catch (Exception e)
             {
                 throw new RuntimeException("Failed to instantiate class "
-                        + className);
+                    + className);
             }
         }
 
@@ -474,7 +728,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
 
     private void loadMBeanExporter() throws BeansException,
-            ClassNotFoundException
+        ClassNotFoundException
     {
         mbeanExporter.init();
         mbeanExporter.loadMBeans(mbeanMap);
@@ -482,33 +736,33 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
 
     private IStatisticsStore getStatsStore() throws BeansException,
-            ClassNotFoundException
+        ClassNotFoundException
     {
         logger.info("loading bean "
-                + ConfigConstants.DEFAULT_STAT_STORE_CLASSNAME + "...");
+            + ConfigConstants.DEFAULT_STAT_STORE_CLASSNAME + "...");
         return (IStatisticsStore) ContextUtils
-                .loadClass(ConfigConstants.DEFAULT_STAT_STORE_CLASSNAME);
+            .loadClass(ConfigConstants.DEFAULT_STAT_STORE_CLASSNAME);
 
     }
 
 
     private StatsCalculator getStatsCalculator() throws BeansException,
-            ClassNotFoundException
+        ClassNotFoundException
     {
         logger.info("loading bean "
-                + ConfigConstants.DEFAULT_STAT_CALCULATOR_CLASSNAME + "...");
+            + ConfigConstants.DEFAULT_STAT_CALCULATOR_CLASSNAME + "...");
         return (StatsCalculator) ContextUtils
-                .loadClass(ConfigConstants.DEFAULT_STAT_CALCULATOR_CLASSNAME);
+            .loadClass(ConfigConstants.DEFAULT_STAT_CALCULATOR_CLASSNAME);
     }
 
 
     private StatsCollector getStatsCollector() throws BeansException,
-            ClassNotFoundException
+        ClassNotFoundException
     {
         logger.info("loading bean "
-                + ConfigConstants.DEFAULT_STAT_COLLECTOR_CLASSNAME + "...");
+            + ConfigConstants.DEFAULT_STAT_COLLECTOR_CLASSNAME + "...");
         return (StatsCollector) ContextUtils
-                .loadClass(ConfigConstants.DEFAULT_STAT_COLLECTOR_CLASSNAME);
+            .loadClass(ConfigConstants.DEFAULT_STAT_COLLECTOR_CLASSNAME);
     }
 
 
@@ -532,7 +786,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName)
-            throws BeansException
+        throws BeansException
     {
         if (bean instanceof IStatsCollectable)
         {
@@ -566,7 +820,7 @@ public class Bootstrap implements IBootstrap, BeanPostProcessor
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName)
-            throws BeansException
+        throws BeansException
     {
         return bean;
     }

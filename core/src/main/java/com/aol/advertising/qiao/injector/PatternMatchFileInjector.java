@@ -114,8 +114,8 @@ import com.aol.advertising.qiao.util.cache.PositionCache;
  */
 @ManagedResource
 public class PatternMatchFileInjector<T> implements IDataInjector,
-        IInjectBookKeeper, IInjectPositionCacheDependency, ISuspendable,
-        IStatsCalculatorAware
+    IInjectBookKeeper, IInjectPositionCacheDependency, ISuspendable,
+    IStatsCalculatorAware
 {
     public enum FileReadStatus
     {
@@ -128,12 +128,12 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     private String srcDir; // source file directory
     private String filePattern; // file name matching pattern
     private long fileCheckDelayMillis = 1000; // wait time for files to be
-                                              // available
+    // available
     private READ_MODE readMode = READ_MODE.TEXTBLOCK; // read processing mode
     private int bufSize = 4096; // read buffer size
     private int maxFilesToFind = -1;
     private boolean autoCommitFilePosition = false; // note: je auto-commit is
-                                                    // unstable
+    // unstable
     private String durabilitySettings;
     private int cacheDefaultExpirySecs = 86400;
     private int cacheDiskReapingIntervalSecs = 60;
@@ -198,8 +198,6 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
         _setupCallback();
 
-        _setupDoneFileHandler();
-
         _registerStatsCollector();
 
         _registerStatsCalculator();
@@ -241,13 +239,16 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             positionCache.setDurabilitySettings(durabilitySettings);
         positionCache.setDefaultExpirySecs(this.cacheDefaultExpirySecs);
         positionCache
-                .setDiskReapingInitDelaySecs(cacheDiskReapingInitDelaySecs);
+            .setDiskReapingInitDelaySecs(cacheDiskReapingInitDelaySecs);
         positionCache.setDiskReapingIntervalSecs(cacheDiskReapingIntervalSecs);
         fileReadPosition = new FileReadingPositionCache(positionCache);
         positionCache.start();
 
     }
 
+    public void setDoneFileHandler(final DoneFileHandler doneFileHandler) {
+        this.doneFileHandler = doneFileHandler;
+    }
 
     private void _setupFileFinder()
     {
@@ -289,33 +290,21 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
 
     private FileReadingPositionCache getPoistionFromCache(long key,
-            String filename) throws Exception
+                                                          String filename) throws Exception
     {
         fileReadPosition.setKey(key);
 
         FileReadingPositionCache.FileReadState fstate = fileReadPosition
-                .getReadState();
+            .getReadState();
         String s = String
-                .format("LAST PROCESSING STATUS: file=%s, timestamp=%s, read_position=%d, checksum=%d",
-                        filename,
-                        CommonUtils.getFriendlyTimeString(fstate.timestamp),
-                        fstate.position, fstate.checksum);
+            .format("LAST PROCESSING STATUS: file=%s, timestamp=%s, read_position=%d, checksum=%d",
+                filename,
+                CommonUtils.getFriendlyTimeString(fstate.timestamp),
+                fstate.position, fstate.checksum);
         logger.info(s);
 
         return fileReadPosition;
     }
-
-
-    private void _setupDoneFileHandler()
-    {
-        doneFileHandler = ContextUtils.getBean(DoneFileHandler.class); // a
-                                                                       // singleton
-                                                                       // - init
-                                                                       // by
-                                                                       // file
-                                                                       // manager
-    }
-
 
     @SuppressWarnings("unchecked")
     private AbstractFileReader< ? > _createReader() throws Exception
@@ -328,20 +317,20 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         {
             case TEXTBLOCK:
                 file_reader = TextBlockFileReader.create(bufSize,
-                        (ITailerDataHandler<String>) dataHandler);
+                    (ITailerDataHandler<String>) dataHandler);
                 break;
             case BINARY:
                 file_reader = BinaryFileReader.create(bufSize,
 
-                (ITailerDataHandler<ByteBuffer>) dataHandler);
+                    (ITailerDataHandler<ByteBuffer>) dataHandler);
                 break;
             case AVRO:
                 file_reader = AvroFileReader.create(bufSize,
-                        (ITailerDataHandler<ByteBuffer>) dataHandler);
+                    (ITailerDataHandler<ByteBuffer>) dataHandler);
                 break;
             default:
                 throw new ConfigurationException("invalid tailer mode: "
-                        + readMode);
+                    + readMode);
         }
 
         file_reader.setNumInputs(numInputs);
@@ -350,7 +339,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         file_reader.setChecksumByteLength(checksumByteLength);
         file_reader.setAutoCommitFilePosition(autoCommitFilePosition);
         file_reader.registerListener(bookKeeper); // bookKeeper must be
-                                                  // registered first
+        // registered first
         for (IFileOperationListener lis : listeners)
             file_reader.registerListener(lis);
 
@@ -376,20 +365,20 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
                     if (numInputs.get() > 0)
                     {
                         applicationEventPublisher.publishEvent(new StatsEvent(
-                                this, src, funnelId, StatsOp.INCRBY,
-                                statKeyInputs, numInputs.getAndSet(0)));
+                            this, src, funnelId, StatsOp.INCRBY,
+                            statKeyInputs, numInputs.getAndSet(0)));
                     }
 
                     if (numFiles.get() > 0)
                     {
                         applicationEventPublisher.publishEvent(new StatsEvent(
-                                this, src, funnelId, StatsOp.INCRBY,
-                                statKeyFiles, numFiles.getAndSet(0)));
+                            this, src, funnelId, StatsOp.INCRBY,
+                            statKeyFiles, numFiles.getAndSet(0)));
                     }
 
                     applicationEventPublisher.publishEvent(new StatsEvent(this,
-                            src, funnelId, StatsOp.INCRBY_INTVL_STAT,
-                            statKeyFileTime, fpStats.getAndReset()));
+                        src, funnelId, StatsOp.INCRBY_INTVL_STAT,
+                        statKeyFileTime, fpStats.getAndReset()));
 
                     return null;
                 }
@@ -407,25 +396,25 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             IStatisticsStore statsStore = StatsUtils.getStatsStore(funnelId);
             if (statsStore == null)
                 throw new ConfigurationException(funnelId
-                        + " statistics store does not exist");
+                    + " statistics store does not exist");
 
             if (counterKeys.size() == 0)
             {
                 PubStats pstats = new PubStats(statKeyFiles, true, false,
-                        false, false); // raw
+                    false, false); // raw
                 counterKeys.put(pstats.getMetric(), pstats);
 
                 pstats = new PubStats(statKeyInputs, false, false, true, false); // diff
                 counterKeys.put(pstats.getMetric(), pstats);
 
                 pstats = new PubStats(StatType.INTERVAL_METRIC,
-                        statKeyFileTime, false, true, false, false); // avg
+                    statKeyFileTime, false, true, false, false); // avg
                 counterKeys.put(pstats.getMetric(), pstats);
 
             }
 
             statsCalculator.register(statsCalculator.new CalcCallable(
-                    statsStore, counterKeys));
+                statsStore, counterKeys));
         }
 
     }
@@ -528,7 +517,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         File fileToTail = file.toFile();
 
         long checksum = CommonUtils.checksumOptionalylUseFileLength(fileToTail,
-                checksumByteLength);
+            checksumByteLength);
 
         tryAcquireLock(checksum); // ------------
 
@@ -548,7 +537,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         if (!doneFileHandler.nameContainsChecksum(file, checksum))
         {
             Path new_path = doneFileHandler.renameFileToIncludeChecksum(file,
-                    checksum);
+                checksum);
             file = new_path;
         }
 
@@ -562,12 +551,12 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             long dur = System.currentTimeMillis() - ts_start;
             fpStats.update(dur);
             logger.info(String.format("file processing time: %.3f secs",
-                    dur / 1000.0));
+                dur / 1000.0));
 
             fileReadPosition.remove(currentReadFileChecksum);
             if (logger.isDebugEnabled())
                 logger.debug("removed " + currentReadFileChecksum
-                        + " from positionCache");
+                    + " from positionCache");
         }
     }
 
@@ -581,7 +570,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
      * @throws Exception
      */
     private boolean processFile(Path filePath, long checksum,
-            QiaoFileEntry historyEntry) throws Exception
+                                QiaoFileEntry historyEntry) throws Exception
     {
 
         File file_to_tail = filePath.toFile();
@@ -590,7 +579,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         copyNewOrUpdatedRecordsFromDependentCache();
 
         FileReadStatus read_status = setupFileReader(file_to_tail, checksum,
-                historyEntry);
+            historyEntry);
         if (read_status == FileReadStatus.COMPLETE)
             return true;
 
@@ -612,14 +601,14 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
      * @throws Exception
      */
     private FileReadStatus setupFileReader(File fileToTail, long checksum,
-            QiaoFileEntry historyEntry) throws Exception
+                                           QiaoFileEntry historyEntry) throws Exception
     {
 
         // check position cache for last read offset
         FileReadingPositionCache _position = getPoistionFromCache(checksum,
-                fileToTail.getAbsolutePath());
+            fileToTail.getAbsolutePath());
         FileReadingPositionCache.FileReadState fstate = _position
-                .getReadState();
+            .getReadState();
 
         FileReadStatus status;
         if (historyEntry != null)
@@ -628,7 +617,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             // larger value
             long pos = historyEntry.getOffset();
             if (pos > fstate.position
-                    && historyEntry.getTimeProcessed() > fstate.timestamp)
+                && historyEntry.getTimeProcessed() > fstate.timestamp)
             {
                 fstate.position = pos;
                 fstate.timestamp = historyEntry.getTimeProcessed();
@@ -655,11 +644,11 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
 
     private void tryAcquireLock(long checksum) throws IOException,
-            InterruptedException
+        InterruptedException
     {
         if (logger.isDebugEnabled())
             logger.debug("try acquiring access lock for file with checksum="
-                    + checksum);
+                + checksum);
 
         while (fileLockManager.containsFileLock(checksum) && running.get())
             CommonUtils.sleepButInterruptable(100);
@@ -716,10 +705,10 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
         {
             if (checksum == 0)
                 checksum = CommonUtils.checksumOptionalylUseFileLength(
-                        file.toFile(), checksumByteLength);
+                    file.toFile(), checksumByteLength);
 
             quarantineFileHandler.moveFileToQuarantineDirIfExists(file,
-                    checksum);
+                checksum);
         }
         catch (InterruptedException e)
         {
@@ -755,9 +744,9 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             running.set(false);
             fileReader.stop();
             fileReader.awaitTermination(); // wait for position committed before
-                                           // close
+            // close
             CommonUtils.shutdownAndAwaitTermination(executor, 3,
-                    TimeUnit.SECONDS);
+                TimeUnit.SECONDS);
 
             status = InjectorStatus.SUSPENDED;
         }
@@ -779,7 +768,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
                 fileReader.start();
 
                 executor = CommonUtils
-                        .createSingleThreadExecutor("FileInjector");
+                    .createSingleThreadExecutor("FileInjector");
                 executor.execute(this);
 
                 status = InjectorStatus.ACTIVE;
@@ -789,7 +778,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
             catch (Exception e)
             {
                 logger.error(
-                        "failed to resume the opration => " + e.getMessage(), e);
+                    "failed to resume the opration => " + e.getMessage(), e);
             }
         }
         else
@@ -807,9 +796,9 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
             fileReader.stop();
             fileReader.awaitTermination(); // wait for position committed before
-                                           // close
+            // close
             CommonUtils.shutdownAndAwaitTermination(executor, 3,
-                    TimeUnit.SECONDS);
+                TimeUnit.SECONDS);
 
             fileReadPosition.close();
 
@@ -822,7 +811,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     public boolean isRunning()
     {
         return running.get() && !executor.isTerminated()
-                && (status == InjectorStatus.ACTIVE);
+            && (status == InjectorStatus.ACTIVE);
     }
 
 
@@ -858,7 +847,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
     @Override
     public void setApplicationEventPublisher(
-            ApplicationEventPublisher applicationEventPublisher)
+        ApplicationEventPublisher applicationEventPublisher)
     {
         this.applicationEventPublisher = applicationEventPublisher;
     }
@@ -1141,7 +1130,7 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
     {
 
         if (initPositionCacheFrom != null
-                && initPositionCacheFrom != positionCache)
+            && initPositionCacheFrom != positionCache)
         {
             int count = positionCache.copyNewRecordsFrom(initPositionCacheFrom);
             logger.info("total records copied: " + count);
@@ -1220,14 +1209,14 @@ public class PatternMatchFileInjector<T> implements IDataInjector,
 
 
     public void setCacheDiskReapingInitDelaySecs(
-            int cacheDiskReapingInitDelaySecs)
+        int cacheDiskReapingInitDelaySecs)
     {
         this.cacheDiskReapingInitDelaySecs = cacheDiskReapingInitDelaySecs;
     }
 
 
     public void setQuarantineFileHandler(
-            QuarantineFileHandler quarantineFileHandler)
+        QuarantineFileHandler quarantineFileHandler)
     {
         this.quarantineFileHandler = quarantineFileHandler;
     }
